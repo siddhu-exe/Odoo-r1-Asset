@@ -111,7 +111,7 @@ export default function Assets() {
     <MainLayout>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Assets Directory</h1>
+          <h1 className="text-[32px] sm:text-[38px] font-black text-foreground tracking-tight">Assets Directory</h1>
           <p className="text-text-secondary mt-1">Register and track all organizational assets</p>
         </div>
         <button
@@ -175,15 +175,34 @@ export default function Assets() {
           <p className="text-text-secondary text-sm mt-1">Try adjusting your filters or register a new asset</p>
         </div>
       ) : (
-        <div className="grid gap-3">
-          {assets.map(asset => (
-            <AssetRow
-              key={asset.id}
-              asset={asset}
-              onViewDetails={() => setSelectedAsset(asset)}
-              onEdit={() => setEditingAsset(asset)}
-            />
-          ))}
+        <div className="card p-0 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b border-border-color">
+                  <th className="py-3 pl-5 pr-3 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary">#</th>
+                  <th className="py-3 px-3 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary">Asset Name</th>
+                  <th className="py-3 px-3 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary">Category</th>
+                  <th className="py-3 px-3 text-left text-xs font-semibold uppercase tracking-wider text-text-secondary">Status / Condition</th>
+                  <th className="py-3 px-3 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary">Location</th>
+                  <th className="py-3 px-3 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary">Value</th>
+                  <th className="py-3 px-3 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary">Added</th>
+                  <th className="py-3 pl-3 pr-5 text-right text-xs font-semibold uppercase tracking-wider text-text-secondary">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {assets.map((asset, index) => (
+                  <AssetRow
+                    key={asset.id}
+                    asset={asset}
+                    index={index}
+                    onViewDetails={() => setSelectedAsset(asset)}
+                    onEdit={() => setEditingAsset(asset)}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 

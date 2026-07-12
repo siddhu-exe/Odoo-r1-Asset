@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 
 import { toast } from 'sonner'
@@ -61,6 +62,11 @@ export default function Signup() {
       handleSubmit(e)
     }
   }
+
+  useEffect(() => {
+    document.body.classList.add('dashboard-page')
+    return () => document.body.classList.remove('dashboard-page')
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-bg-secondary to-background flex items-center justify-center px-4">

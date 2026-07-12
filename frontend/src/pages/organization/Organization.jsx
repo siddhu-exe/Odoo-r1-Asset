@@ -162,7 +162,7 @@ export default function Organization() {
     <MainLayout>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Organization Setup</h1>
+          <h1 className="text-[32px] sm:text-[38px] font-black text-foreground tracking-tight">Organization Setup</h1>
           <p className="text-text-secondary mt-1">Manage departments, categories &amp; employees</p>
         </div>
         <button onClick={openCreate} className="btn-primary flex items-center justify-center gap-2">

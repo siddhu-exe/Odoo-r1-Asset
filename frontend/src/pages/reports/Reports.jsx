@@ -14,7 +14,7 @@ const utilizationData = [
   { month: 'Jun', usage: 82, available: 18 }
 ]
 
-const COLORS = ['#00d4ff', '#ff6b35', '#00d98e', '#ffa500']
+const COLORS = ['#FF5A3C', '#8B7FE8', '#C9CCD3', '#111111']
 
 export default function Reports() {
   const [reportType, setReportType] = useState('utilization')
@@ -71,7 +71,7 @@ export default function Reports() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Reports & Analytics</h1>
+          <h1 className="text-[32px] sm:text-[38px] font-black text-foreground tracking-tight">Reports & Analytics</h1>
           <p className="text-text-secondary mt-1">Asset utilization, maintenance trends, and insights</p>
         </div>
         <button
@@ -116,11 +116,11 @@ export default function Reports() {
               <h3 className="text-lg font-semibold text-foreground mb-4">Asset Utilization Trend</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <LineChart data={utilizationData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                  <XAxis stroke="#cbd5e1" />
-                  <YAxis stroke="#cbd5e1" />
-                  <Tooltip contentStyle={{ background: '#1a2847', border: '1px solid #1e293b' }} />
-                  <Line type="monotone" dataKey="usage" stroke="#00d4ff" strokeWidth={3} dot={{ fill: '#00d4ff' }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis stroke="#6B7280" />
+                  <YAxis stroke="#6B7280" />
+                  <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '16px', color: '#111111', fontSize: '12px', boxShadow: '0 14px 30px rgba(17,17,17,0.08)' }} />
+                  <Line type="monotone" dataKey="usage" stroke="#FF5A3C" strokeWidth={3} dot={{ fill: '#FF5A3C' }} />
                 </LineChart>
               </ResponsiveContainer>
               {utilization && (
@@ -134,13 +134,13 @@ export default function Reports() {
               <h3 className="text-lg font-semibold text-foreground mb-4">Usage vs Available</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={utilizationData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                  <XAxis stroke="#cbd5e1" />
-                  <YAxis stroke="#cbd5e1" />
-                  <Tooltip contentStyle={{ background: '#1a2847', border: '1px solid #1e293b' }} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis stroke="#6B7280" />
+                  <YAxis stroke="#6B7280" />
+                  <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '16px', color: '#111111', fontSize: '12px', boxShadow: '0 14px 30px rgba(17,17,17,0.08)' }} />
                   <Legend />
-                  <Bar dataKey="usage" fill="#00d4ff" />
-                  <Bar dataKey="available" fill="#ff6b35" />
+                  <Bar dataKey="usage" fill="#FF5A3C" radius={[12, 12, 0, 0]} />
+                  <Bar dataKey="available" fill="#111111" radius={[12, 12, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -154,12 +154,12 @@ export default function Reports() {
               <h3 className="text-lg font-semibold text-foreground mb-4">Maintenance by Asset</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
-                  <Pie data={maintenancePieData} cx="50%" cy="50%" labelLine={false} label={{ fill: '#cbd5e1' }} outerRadius={80} dataKey="value">
+                  <Pie data={maintenancePieData} cx="50%" cy="50%" labelLine={false} label={{ fill: '#6B7280' }} innerRadius={45} outerRadius={80} paddingAngle={3} dataKey="value">
                     {maintenancePieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ background: '#1a2847', border: '1px solid #1e293b' }} />
+                  <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '16px', color: '#111111', fontSize: '12px', boxShadow: '0 14px 30px rgba(17,17,17,0.08)' }} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -173,11 +173,11 @@ export default function Reports() {
               ) : maintenanceChartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={maintenanceChartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                    <XAxis dataKey="name" stroke="#cbd5e1" fontSize={11} />
-                    <YAxis stroke="#cbd5e1" />
-                    <Tooltip contentStyle={{ background: '#1a2847', border: '1px solid #1e293b' }} />
-                    <Bar dataKey="frequency" fill="#ff6b35" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                    <XAxis dataKey="name" stroke="#6B7280" fontSize={11} />
+                    <YAxis stroke="#6B7280" />
+                    <Tooltip contentStyle={{ background: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '16px', color: '#111111', fontSize: '12px', boxShadow: '0 14px 30px rgba(17,17,17,0.08)' }} />
+                    <Bar dataKey="frequency" fill="#FF5A3C" radius={[12, 12, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (

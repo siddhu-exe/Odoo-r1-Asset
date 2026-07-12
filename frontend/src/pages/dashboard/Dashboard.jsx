@@ -43,11 +43,6 @@ export default function Dashboard() {
   const [notifications, setNotifications] = useState([])
 
   useEffect(() => {
-    document.body.classList.add('dashboard-page')
-    return () => document.body.classList.remove('dashboard-page')
-  }, [])
-
-  useEffect(() => {
     Promise.all([
       api.get('/reports/dashboard'),
       api.get('/notifications')

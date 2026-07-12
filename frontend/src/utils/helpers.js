@@ -96,7 +96,7 @@ export const calculateDaysSince = (date) => {
 }
 
 export const getRandomColor = () => {
-  const colors = ['#00d4ff', '#ff6b35', '#00d98e', '#ffa500', '#ff4757']
+  const colors = ['#FF5A3C', '#8B7FE8', '#C9CCD3', '#111111', '#6B7280']
   return colors[Math.floor(Math.random() * colors.length)]
 }
 

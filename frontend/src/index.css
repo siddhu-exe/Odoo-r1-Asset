@@ -10,6 +10,7 @@
   --text-muted: #8A8580;
   --accent: #E8622C;
   --accent-secondary: #F4D35E;
+  --neutral: #C9CCD3;
   --border: #E8E3D8;
   --chart-1: #E8622C;
   --chart-2: #F4D35E;
@@ -44,6 +45,9 @@ body.dashboard-page {
   --border: #E5E7EB;
   --text-primary: #111111;
   --text-muted: #6B7280;
+  --accent: #FF5A3C;
+  --accent-secondary: #8B7FE8;
+  --neutral: #C9CCD3;
 }
 
 body.dashboard-page::before {
@@ -120,8 +124,8 @@ html.lenis body {
   }
 
   .card {
-    @apply relative bg-bg-secondary border border-border-color rounded-xl p-6 transition-all duration-300;
-    box-shadow: 0 1px 3px rgba(43, 43, 40, 0.06), 0 1px 2px rgba(43, 43, 40, 0.04);
+    @apply relative bg-bg-secondary border border-border-color rounded-[24px] p-6 transition-all duration-300;
+    box-shadow: 0 14px 34px rgba(17, 17, 17, 0.06);
   }
 
   .card::before,

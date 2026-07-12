@@ -1,10 +1,15 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import Navbar from './Navbar'
 
 export default function MainLayout({ children }) {
   const location = useLocation()
   const isDashboard = location.pathname === '/dashboard'
+
+  useEffect(() => {
+    document.body.classList.add('dashboard-page')
+    return () => document.body.classList.remove('dashboard-page')
+  }, [])
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">

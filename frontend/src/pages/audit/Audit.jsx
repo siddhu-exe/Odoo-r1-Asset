@@ -89,7 +89,7 @@ export default function Audit() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Asset Audit</h1>
+          <h1 className="text-[32px] sm:text-[38px] font-black text-foreground tracking-tight">Asset Audit</h1>
           <p className="text-text-secondary mt-1">Audit cycles and discrepancy reports</p>
         </div>
         <button
