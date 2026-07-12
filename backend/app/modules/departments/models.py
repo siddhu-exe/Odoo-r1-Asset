@@ -32,7 +32,7 @@ class Department(TimestampedModel):
 
     head_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("employees.id", ondelete="SET NULL"),
+        ForeignKey("employees.id", ondelete="SET NULL", use_alter=True, name="fk_department_head_id"),
         nullable=True,
     )
 
