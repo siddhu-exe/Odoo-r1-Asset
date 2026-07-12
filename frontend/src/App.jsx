@@ -77,11 +77,17 @@ export default function App() {
             position="top-right"
             theme="light"
             richColors
+            expand={false}
             toastOptions={{
               style: {
                 background: 'var(--card)',
                 border: '1px solid var(--border)',
-                color: 'var(--text-primary)'
+                color: 'var(--text-primary)',
+                padding: '14px 20px',
+                minWidth: '320px',
+                fontSize: '14px',
+                gap: '10px',
+                borderRadius: '12px',
               }
             }}
           />

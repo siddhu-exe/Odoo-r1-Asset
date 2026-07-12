@@ -107,7 +107,6 @@ export default function Dashboard() {
               <div className="flex items-start gap-4">
                 <div className="relative shrink-0">
                   <img src={user?.avatar} alt={user?.name} className="w-16 h-16 rounded-full object-cover border-4 border-white" />
-                  <div className="absolute -left-1 -bottom-1 rounded-full bg-[#FF5A3C] text-white text-[10px] font-bold px-2.5 py-1 shadow-[0_8px_20px_rgba(255,90,60,0.28)]">4.9</div>
                 </div>
                 <div className="min-w-0 pt-1">
                   <p className="text-[11px] uppercase tracking-[0.28em] text-black/45 font-semibold">Profile</p>
