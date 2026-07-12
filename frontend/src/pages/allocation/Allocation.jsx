@@ -1,43 +1,65 @@
-import React, { useState } from 'react'
-import { useData } from '../../context/DataContext'
+import React, { useState, useEffect, useCallback } from 'react'
 import MainLayout from '../../components/layout/MainLayout'
-import { Send, Plus, ArrowRight, AlertCircle, CheckCircle } from 'lucide-react'
-import { getStatusColor, formatDate } from '../../utils/helpers'
+import { Plus, ArrowRight, AlertCircle } from 'lucide-react'
+import { getStatusColor, formatDate, formatStatus } from '../../utils/helpers'
 import { toast } from 'sonner'
 import AllocationModal from './AllocationModal'
+import api from '../../api'
 
 export default function Allocation() {
-  const { assets, employees, transferAsset } = useData()
+  const [assets, setAssets] = useState([])
+  const [employees, setEmployees] = useState({})
+  const [allocations, setAllocations] = useState([])
+  const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
-  const [allocationHistory] = useState([
-    {
-      date: '2024-01-10',
-      assetId: 'AF-0014',
-      assetName: 'Laptop',
-      fromEmployee: 'Priya Shah',
-      toEmployee: 'Arjun Patel',
-      reason: 'Transfer Request',
-      status: 'Approved'
-    },
-    {
-      date: '2024-01-08',
-      assetId: 'AF-0062',
-      assetName: 'Projector',
-      fromEmployee: 'Maintenance',
-      toEmployee: 'Engineering Dept',
-      reason: 'Return after Maintenance',
-      status: 'Approved'
-    }
-  ])
 
-  const handleTransfer = (assetId, toEmployee) => {
-    transferAsset(assetId, toEmployee)
-    toast.success(`Asset transferred to ${toEmployee}`)
-    setShowModal(false)
+  const loadData = useCallback(async () => {
+    setLoading(true)
+    try {
+      const [assetsRes, employeesRes, allocationsRes] = await Promise.all([
+        api.get('/assets?page_size=100'),
+        api.get('/employees?page_size=100'),
+        api.get('/allocations?page_size=100')
+      ])
+      setAssets(assetsRes.data.items)
+      setEmployees(Object.fromEntries(employeesRes.data.items.map(e => [e.id, e])))
+      setAllocations(allocationsRes.data.items)
+    } catch (err) {
+      toast.error('Failed to load allocation data')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
+
+  const handleTransfer = async (assetId, toEmployeeId, reason) => {
+    try {
+      await api.post('/allocations/transfers', {
+        asset_id: assetId,
+        to_employee_id: toEmployeeId,
+        reason
+      })
+      toast.success('Transfer request submitted for approval')
+      setShowModal(false)
+      loadData()
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to submit transfer request')
+    }
   }
 
-  const allocatedAssets = assets.filter(a => a.status === 'Allocated')
-  const availableAssets = assets.filter(a => a.status === 'Available')
+  const activeAllocationByAsset = Object.fromEntries(
+    allocations.filter(a => a.status === 'active').map(a => [a.asset_id, a])
+  )
+
+  const allocatedAssets = assets.filter(a => a.status === 'allocated')
+  const availableAssets = assets.filter(a => a.status === 'available')
+
+  const sortedAllocations = [...allocations].sort(
+    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+  )
 
   return (
     <MainLayout>
@@ -85,54 +107,79 @@ export default function Allocation() {
       <div className="mb-8">
         <h2 className="text-xl font-bold text-foreground mb-4">Currently Allocated Assets</h2>
         <div className="space-y-3">
-          {allocatedAssets.map(asset => (
-            <div key={asset.id} className="card flex items-center justify-between">
-              <div className="flex-1">
-                <h3 className="font-semibold text-foreground">{asset.name}</h3>
-                <p className="text-sm text-text-secondary">{asset.id} • Allocated to {asset.allocatedTo}</p>
-              </div>
-              <button
-                onClick={() => setShowModal(true)}
-                className="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg font-medium transition-colors flex items-center gap-2"
-              >
-                <ArrowRight size={16} />
-                Transfer
-              </button>
-            </div>
-          ))}
+          {loading ? (
+            <p className="text-text-secondary text-sm">Loading...</p>
+          ) : allocatedAssets.length > 0 ? (
+            allocatedAssets.map(asset => {
+              const allocation = activeAllocationByAsset[asset.id]
+              const employee = allocation?.employee_id ? employees[allocation.employee_id] : null
+              return (
+                <div key={asset.id} className="card flex items-center justify-between">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-foreground">{asset.name}</h3>
+                    <p className="text-sm text-text-secondary">
+                      {asset.asset_tag} • Allocated to {employee ? `${employee.first_name} ${employee.last_name}` : 'Unknown'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowModal(true)}
+                    className="px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg font-medium transition-colors flex items-center gap-2"
+                  >
+                    <ArrowRight size={16} />
+                    Transfer
+                  </button>
+                </div>
+              )
+            })
+          ) : (
+            <p className="text-text-secondary text-sm">No assets currently allocated</p>
+          )}
         </div>
       </div>
 
       {/* Allocation History */}
       <div className="mb-8">
-        <h2 className="text-xl font-bold text-foreground mb-4">Transfer History</h2>
+        <h2 className="text-xl font-bold text-foreground mb-4">Allocation History</h2>
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border-color">
                 <th className="text-left text-sm font-semibold text-text-secondary py-3">Date</th>
                 <th className="text-left text-sm font-semibold text-text-secondary py-3">Asset</th>
-                <th className="text-left text-sm font-semibold text-text-secondary py-3">From</th>
-                <th className="text-left text-sm font-semibold text-text-secondary py-3">To</th>
-                <th className="text-left text-sm font-semibold text-text-secondary py-3">Reason</th>
+                <th className="text-left text-sm font-semibold text-text-secondary py-3">Employee</th>
+                <th className="text-left text-sm font-semibold text-text-secondary py-3">Expected Return</th>
                 <th className="text-left text-sm font-semibold text-text-secondary py-3">Status</th>
               </tr>
             </thead>
             <tbody>
-              {allocationHistory.map((record, idx) => (
-                <tr key={idx} className="border-b border-border-color hover:bg-bg-tertiary/30 transition-colors">
-                  <td className="py-3 text-foreground text-sm">{formatDate(record.date)}</td>
-                  <td className="py-3 text-foreground font-semibold">{record.assetName} ({record.assetId})</td>
-                  <td className="py-3 text-text-secondary text-sm">{record.fromEmployee}</td>
-                  <td className="py-3 text-text-secondary text-sm">{record.toEmployee}</td>
-                  <td className="py-3 text-text-secondary text-sm">{record.reason}</td>
-                  <td className="py-3">
-                    <span className={`text-xs px-3 py-1 rounded-full ${getStatusColor(record.status)}`}>
-                      {record.status}
-                    </span>
+              {sortedAllocations.map(record => {
+                const asset = assets.find(a => a.id === record.asset_id)
+                const employee = record.employee_id ? employees[record.employee_id] : null
+                return (
+                  <tr key={record.id} className="border-b border-border-color hover:bg-bg-tertiary/30 transition-colors">
+                    <td className="py-3 text-foreground text-sm">{formatDate(record.created_at)}</td>
+                    <td className="py-3 text-foreground font-semibold">{asset ? asset.name : record.asset_id}</td>
+                    <td className="py-3 text-text-secondary text-sm">
+                      {employee ? `${employee.first_name} ${employee.last_name}` : '-'}
+                    </td>
+                    <td className="py-3 text-text-secondary text-sm">
+                      {record.expected_return_date ? formatDate(record.expected_return_date) : '-'}
+                    </td>
+                    <td className="py-3">
+                      <span className={`text-xs px-3 py-1 rounded-full ${getStatusColor(record.status)}`}>
+                        {formatStatus(record.status)}
+                      </span>
+                    </td>
+                  </tr>
+                )
+              })}
+              {!loading && sortedAllocations.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="py-6 text-center text-text-secondary text-sm">
+                    No allocation history found
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -144,7 +191,7 @@ export default function Allocation() {
           onClose={() => setShowModal(false)}
           onSubmit={handleTransfer}
           assets={allocatedAssets}
-          employees={employees}
+          employees={Object.values(employees)}
         />
       )}
     </MainLayout>
