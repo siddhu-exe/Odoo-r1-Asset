@@ -13,7 +13,12 @@
       "Bash(git fetch *)",
       "Bash(git commit *)",
       "Bash(alembic current *)",
-      "Bash(alembic heads *)"
+      "Bash(alembic heads *)",
+      "Skill(dataviz)",
+      "Bash(node scripts/validate_palette.js \"#E8622C,#F4D35E,#5B8A72,#7A6FA6,#4A7A96,#B85C5C\" --mode light --surface \"#FFFFFF\")",
+      "Bash(node scripts/validate_palette.js \"#2a78d6,#1baf7a,#eda100,#008300,#4a3aa7,#e34948,#e87ba4,#eb6834\" --mode light --surface \"#FFFFFF\")",
+      "Read(//tmp/**)",
+      "Read(//tmp/ui-ux-pro-max-skill/**)"
     ]
   }
 }

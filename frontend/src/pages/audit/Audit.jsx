@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import MainLayout from '../../components/layout/MainLayout'
-import { FileText, Plus, AlertCircle, CheckCircle, Loader2, X, UserPlus } from 'lucide-react'
+import { FileText, Plus, AlertCircle, CheckCircle, Loader2, X, UserPlus, Calendar, ChevronUp, ChevronDown } from 'lucide-react'
 import { getStatusColor, formatStatus, formatDate } from '../../utils/helpers'
 import { toast } from 'sonner'
 import api from '../../api'
@@ -246,166 +246,148 @@ export default function Audit() {
           <p className="text-text-secondary">No audit cycles yet. {isAdmin ? 'Start one with the button above.' : 'Contact your admin to start an audit.'}</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {auditCycles.map(audit => {
             const report = reports[audit.id]
             const items = auditItems[audit.id] || []
             const discrepancies = report ? report.missing + report.damaged : 0
+            const isExpanded = expandedAudit === audit.id
 
             return (
-              <div key={audit.id} className="card">
+              <div key={audit.id} className={`card flex flex-col transition-all duration-300 ${isExpanded ? 'lg:col-span-2' : ''}`}>
                 {/* Header */}
-                <div className="flex items-center justify-between mb-2">
-                  <button
-                    onClick={() => handleExpand(audit.id)}
-                    className="flex-1 text-left flex items-center gap-3 flex-wrap"
-                  >
-                    <h3 className="font-semibold text-foreground">{audit.name}</h3>
-                    <span className={`text-xs px-2.5 py-1 rounded-full ${getStatusColor(audit.status)}`}>
-                      {formatStatus(audit.status)}
-                    </span>
-                    <span className="text-xs text-text-secondary">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 cursor-pointer" onClick={() => handleExpand(audit.id)}>
+                    <div className="flex items-center gap-3 mb-1.5 flex-wrap">
+                      <h3 className="font-semibold text-lg text-foreground">{audit.name}</h3>
+                      <span className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${getStatusColor(audit.status).replace('bg-', 'bg-').replace('text-', 'text-').concat(' border-').concat(getStatusColor(audit.status).split(' ')[0].replace('bg-', ''))} bg-transparent`}>
+                        {formatStatus(audit.status)}
+                      </span>
+                    </div>
+                    <p className="text-sm text-text-secondary flex items-center gap-2">
+                      <Calendar size={14} className="opacity-70" />
                       {formatDate(audit.start_date)} – {formatDate(audit.end_date)}
-                    </span>
-                  </button>
-                  <div className="flex items-center gap-2 shrink-0 ml-2">
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 ml-4">
                     {isAdmin && audit.status !== 'closed' && (
                       <button
-                        onClick={() => { setAssignModal(audit.id); setAuditorId(employees[0]?.id || '') }}
-                        className="p-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-colors"
+                        onClick={(e) => { e.stopPropagation(); setAssignModal(audit.id); setAuditorId(employees[0]?.id || '') }}
+                        className="p-2 bg-bg-tertiary hover:bg-bg-secondary text-text-secondary hover:text-foreground rounded-lg transition-colors border border-border-color"
                         title="Assign auditor"
                       >
-                        <UserPlus size={14} />
+                        <UserPlus size={16} />
                       </button>
                     )}
                     <button
                       onClick={() => handleExpand(audit.id)}
-                      className="text-text-secondary text-sm"
+                      className="p-2 bg-bg-tertiary hover:bg-bg-secondary text-text-secondary hover:text-foreground rounded-lg transition-colors border border-border-color"
                     >
-                      {expandedAudit === audit.id ? '▼' : '▶'}
+                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     </button>
                   </div>
                 </div>
 
                 {/* Expanded Content */}
                 {expandedAudit === audit.id && (
-                  <div className="space-y-4 mt-4 border-t border-border-color pt-4">
+                  <div className="space-y-4 mt-4 border-t border-border-color pt-6">
                     {loadingReport === audit.id ? (
                       <div className="flex items-center justify-center py-8">
                         <Loader2 size={24} className="animate-spin text-primary" />
                       </div>
                     ) : (
                       <>
-                        {/* Summary */}
-                        {report && (
-                          <div className="overflow-x-auto">
-                            <table className="w-full">
-                              <thead>
-                                <tr className="border-b border-border-color">
-                                  <th className="text-left text-sm font-semibold text-text-secondary py-2">Total Assets</th>
-                                  <th className="text-left text-sm font-semibold text-text-secondary py-2">Verified</th>
-                                  <th className="text-left text-sm font-semibold text-text-secondary py-2">Pending</th>
-                                  <th className="text-left text-sm font-semibold text-text-secondary py-2">Missing</th>
-                                  <th className="text-left text-sm font-semibold text-text-secondary py-2">Damaged</th>
+                        {/* 1. Header Box */}
+                        <div className="bg-bg-secondary border border-border-color rounded-xl p-4">
+                          <h3 className="font-semibold text-foreground">{audit.name} — {formatDate(audit.start_date)} to {formatDate(audit.end_date)}</h3>
+                          <p className="text-sm text-text-secondary mt-1">Auditors: System Admin</p>
+                        </div>
+
+                        {/* 2. Audit Items Table */}
+                        {items.length > 0 ? (
+                          <div className="border border-border-color rounded-xl overflow-hidden">
+                            <table className="w-full text-left border-collapse">
+                              <thead className="bg-bg-secondary border-b border-border-color">
+                                <tr>
+                                  <th className="py-3 px-4 font-semibold text-text-secondary text-sm">Asset</th>
+                                  <th className="py-3 px-4 font-semibold text-text-secondary text-sm text-center">Expected location</th>
+                                  <th className="py-3 px-4 font-semibold text-text-secondary text-sm text-right">Verification</th>
                                 </tr>
                               </thead>
                               <tbody>
-                                <tr>
-                                  <td className="py-2 font-bold text-foreground">{report.total_assets}</td>
-                                  <td className="py-2">
-                                    <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success border border-success/30">{report.verified}</span>
-                                  </td>
-                                  <td className="py-2">
-                                    <span className="text-xs px-2 py-0.5 rounded-full bg-warning/10 text-warning border border-warning/30">{report.pending}</span>
-                                  </td>
-                                  <td className="py-2">
-                                    <span className="text-xs px-2 py-0.5 rounded-full bg-danger/10 text-danger border border-danger/30">{report.missing}</span>
-                                  </td>
-                                  <td className="py-2">
-                                    <span className="text-xs px-2 py-0.5 rounded-full bg-warning/10 text-warning border border-warning/30">{report.damaged}</span>
-                                  </td>
-                                </tr>
+                                {items.map(item => {
+                                  const asset = assets[item.asset_id]
+                                  let pillClass = 'border-border-color text-text-secondary bg-transparent'
+                                  if (item.status === 'verified') pillClass = 'border-success text-success bg-transparent'
+                                  if (item.status === 'missing') pillClass = 'border-danger text-danger bg-transparent'
+                                  if (item.status === 'damaged') pillClass = 'border-text-secondary text-foreground bg-transparent'
+                                  
+                                  return (
+                                    <tr key={item.id} className="border-b border-border-color last:border-0 hover:bg-bg-tertiary/30 transition-colors">
+                                      <td className="py-4 px-4">
+                                        <p className="font-medium text-foreground">{asset?.asset_tag || ''} {asset?.name || item.asset_id}</p>
+                                      </td>
+                                      <td className="py-4 px-4 text-center text-text-secondary text-sm">
+                                        {asset?.location || 'Unknown'}
+                                      </td>
+                                      <td className="py-4 px-4 text-right flex justify-end">
+                                        <div className="relative">
+                                          <select
+                                            value={item.status}
+                                            onChange={(e) => handleUpdateItem(audit.id, item.id, e.target.value)}
+                                            disabled={itemLoading[item.id] || audit.status === 'closed'}
+                                            className={`appearance-none font-medium text-xs text-center cursor-pointer px-4 py-1.5 rounded-full border ${pillClass} focus:outline-none focus:ring-2 focus:ring-accent/50 ${audit.status === 'closed' ? 'opacity-70 cursor-not-allowed' : 'hover:bg-bg-secondary'}`}
+                                            style={{ WebkitAppearance: 'none', MozAppearance: 'none', paddingRight: '1rem', paddingLeft: '1rem' }}
+                                          >
+                                            <option value="pending" className="text-foreground bg-bg-primary">Pending</option>
+                                            <option value="verified" className="text-success bg-bg-primary">Verified</option>
+                                            <option value="missing" className="text-danger bg-bg-primary">Missing</option>
+                                            <option value="damaged" className="text-foreground bg-bg-primary">Damaged</option>
+                                          </select>
+                                          {itemLoading[item.id] && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-bg-primary/80 rounded-full">
+                                              <Loader2 size={12} className="animate-spin text-text-secondary" />
+                                            </div>
+                                          )}
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  )
+                                })}
                               </tbody>
                             </table>
                           </div>
+                        ) : (
+                          !loadingReport && (
+                            <p className="text-text-secondary text-sm text-center py-4 border border-border-color rounded-xl">No audit items — assets will appear here once the audit scope is configured.</p>
+                          )
                         )}
 
-                        {/* Discrepancy Alert */}
-                        {discrepancies > 0 && (
-                          <div className="bg-warning/10 border border-warning/30 rounded-lg p-3">
-                            <p className="font-semibold text-warning flex items-center gap-2 text-sm">
-                              <AlertCircle size={16} />
-                              {discrepancies} discrepanc{discrepancies > 1 ? 'ies' : 'y'} detected
-                            </p>
-                            <div className="mt-1 space-y-0.5">
-                              {report.missing > 0 && <p className="text-xs text-warning/80">• {report.missing} asset(s) missing (High)</p>}
-                              {report.damaged > 0 && <p className="text-xs text-warning/80">• {report.damaged} asset(s) damaged (Medium)</p>}
-                            </div>
-                          </div>
-                        )}
-                        {report && discrepancies === 0 && report.total_assets > 0 && report.pending === 0 && (
-                          <div className="card bg-success/5 border border-success/30">
-                            <p className="text-success text-sm flex items-center gap-2">
-                              <CheckCircle size={16} />
-                              All assets accounted for — no discrepancies
+                        {/* 3. Discrepancy Alert */}
+                        {discrepancies > 0 ? (
+                          <div className="bg-[#F4D35E]/10 border border-[#F4D35E]/30 rounded-xl p-3 flex items-center justify-start gap-3">
+                            <p className="font-semibold text-[#B8860B] text-sm">
+                              {discrepancies} asset{discrepancies > 1 ? 's' : ''} flagged - discrepancy report generated automatically
                             </p>
                           </div>
-                        )}
-
-                        {/* Audit Items Table */}
-                        {items.length > 0 && (
-                          <div>
-                            <h4 className="text-sm font-semibold text-foreground mb-2">Asset Verification ({items.length} items)</h4>
-                            <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1">
-                              {items.map(item => {
-                                const asset = assets[item.asset_id]
-                                return (
-                                  <div key={item.id} className="flex items-center justify-between gap-3 bg-bg-tertiary/50 rounded-lg p-3">
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-medium text-foreground truncate">
-                                        {asset?.name || item.asset_id}
-                                      </p>
-                                      {asset && <p className="text-xs text-text-secondary">{asset.asset_tag} • {asset.location || 'No location'}</p>}
-                                      {item.notes && <p className="text-xs text-text-secondary/70 mt-0.5 truncate">{item.notes}</p>}
-                                    </div>
-                                    <div className="flex items-center gap-1.5 shrink-0">
-                                      <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(item.status)}`}>
-                                        {formatStatus(item.status)}
-                                      </span>
-                                      {audit.status !== 'closed' && (
-                                        <div className="flex gap-1">
-                                          {ITEM_ACTIONS.map(action => (
-                                            <button
-                                              key={action.key}
-                                              disabled={itemLoading[item.id] || item.status === action.key}
-                                              onClick={() => handleUpdateItem(audit.id, item.id, action.key)}
-                                              className={`text-xs px-2 py-1 rounded transition-colors ${action.cls} ${item.status === action.key ? 'opacity-50 cursor-default' : ''}`}
-                                              title={`Mark as ${action.label}`}
-                                            >
-                                              {itemLoading[item.id] ? <Loader2 size={10} className="animate-spin" /> : action.label}
-                                            </button>
-                                          ))}
-                                        </div>
-                                      )}
-                                    </div>
-                                  </div>
-                                )
-                              })}
+                        ) : (
+                          report && report.total_assets > 0 && report.pending === 0 && (
+                            <div className="bg-success/5 border border-success/30 rounded-xl p-3 flex items-center justify-start gap-3">
+                              <p className="text-success text-sm font-semibold">
+                                All assets accounted for — no discrepancies
+                              </p>
                             </div>
-                          </div>
-                        )}
-                        {items.length === 0 && !loadingReport && (
-                          <p className="text-text-secondary text-sm text-center py-4">No audit items — assets will appear here once the audit scope is configured.</p>
+                          )
                         )}
 
-                        {/* Action Buttons */}
+                        {/* 4. Action Buttons */}
                         {audit.status !== 'closed' && isAdmin && (
-                          <div className="flex gap-3 pt-2">
+                          <div className="pt-2">
                             <button
                               onClick={() => handleCloseAudit(audit.id, audit.name)}
-                              className="btn-primary flex-1"
+                              className="px-6 py-2 bg-transparent border-2 border-border-color hover:border-foreground rounded-full text-foreground font-semibold text-sm transition-colors"
                             >
-                              Close Audit Cycle
+                              Close audit cycle
                             </button>
                           </div>
                         )}

@@ -94,6 +94,14 @@ ITEM1_ID  = 'bb000000-0000-4000-8000-000000000001'
 ITEM2_ID  = 'bb000000-0000-4000-8000-000000000002'
 ITEM3_ID  = 'bb000000-0000-4000-8000-000000000003'
 ITEM4_ID  = 'bb000000-0000-4000-8000-000000000004'
+ITEM5_ID  = 'bb000000-0000-4000-8000-000000000005'
+ITEM6_ID  = 'bb000000-0000-4000-8000-000000000006'
+ITEM7_ID  = 'bb000000-0000-4000-8000-000000000007'
+ITEM8_ID  = 'bb000000-0000-4000-8000-000000000008'
+ITEM9_ID  = 'bb000000-0000-4000-8000-000000000009'
+ITEM10_ID = 'bb000000-0000-4000-8000-000000000010'
+ITEM11_ID = 'bb000000-0000-4000-8000-000000000011'
+ITEM12_ID = 'bb000000-0000-4000-8000-000000000012'
 
 # ── Notifications ────────────────────────────────────────────────────────────
 NOTIF1_ID = 'bc000000-0000-4000-8000-000000000001'
@@ -434,6 +442,38 @@ async def _audit_items(conn: asyncpg.Connection) -> None:
         (ITEM4_ID, AUDIT2_ID, CABINET_ID, TEST_ID,
          'missing', 'Cabinet not found at last recorded location (HR Floor). Enquiry sent to HR team.',
          _dt('2026-07-11 11:00:00+00'), _dt('2026-07-01 09:00:00+00'), _dt('2026-07-11 11:00:00+00')),
+         
+        (ITEM5_ID, AUDIT2_ID, INNOVA_ID, TEST_ID,
+         'damaged', 'Bumper damaged during parking.',
+         _dt('2026-07-11 12:00:00+00'), _dt('2026-07-01 09:00:00+00'), _dt('2026-07-11 12:00:00+00')),
+
+        (ITEM6_ID, AUDIT2_ID, PROJECTOR_ID, RAJ_ID,
+         'verified', 'All cables present and bulb working well.',
+         _dt('2026-07-11 12:30:00+00'), _dt('2026-07-01 09:00:00+00'), _dt('2026-07-11 12:30:00+00')),
+
+        (ITEM7_ID, AUDIT2_ID, DESK_ID, TEST_ID,
+         'verified', 'Desk in good condition.',
+         _dt('2026-07-11 13:00:00+00'), _dt('2026-07-01 09:00:00+00'), _dt('2026-07-11 13:00:00+00')),
+
+        (ITEM8_ID, AUDIT2_ID, CHAIR_ID, RAJ_ID,
+         'pending', None,
+         None, _dt('2026-07-01 09:00:00+00'), _dt('2026-07-01 09:00:00+00')),
+
+        (ITEM9_ID, AUDIT2_ID, PRINTER_ID, TEST_ID,
+         'verified', 'Printer toner might need replacement soon.',
+         _dt('2026-07-11 14:00:00+00'), _dt('2026-07-01 09:00:00+00'), _dt('2026-07-11 14:00:00+00')),
+
+        (ITEM10_ID, AUDIT2_ID, SURFACE_ID, RAJ_ID,
+         'missing', 'Surface Pro not on desk. Checking with Ankit.',
+         _dt('2026-07-11 14:30:00+00'), _dt('2026-07-01 09:00:00+00'), _dt('2026-07-11 14:30:00+00')),
+
+        (ITEM11_ID, AUDIT2_ID, FORD_ID, TEST_ID,
+         'verified', 'Van parked in designated spot.',
+         _dt('2026-07-11 15:00:00+00'), _dt('2026-07-01 09:00:00+00'), _dt('2026-07-11 15:00:00+00')),
+
+        (ITEM12_ID, AUDIT2_ID, IPAD_ID, RAJ_ID,
+         'verified', 'iPad locked in conference room A.',
+         _dt('2026-07-11 15:30:00+00'), _dt('2026-07-01 09:00:00+00'), _dt('2026-07-11 15:30:00+00')),
     ]
     await conn.executemany(
         """INSERT INTO audit_items
