@@ -11,6 +11,7 @@ from app.modules.maintenance.repository import MaintenanceRepository
 from app.modules.maintenance.schemas import (
     AssignTechnicianRequest,
     CreateMaintenanceRequest,
+    MaintenanceRequestResponse,
     ResolveRequest,
 )
 from app.shared.pagination import PageParams, PaginatedResponse
@@ -39,7 +40,7 @@ def assert_valid_transition(
 async def list_maintenance_requests(
     session: AsyncSession,
     params: PageParams,
-) -> PaginatedResponse[MaintenanceRequest]:
+) -> PaginatedResponse[MaintenanceRequestResponse]:
     repository = MaintenanceRepository(session)
     total = await repository.count_all()
     requests = await repository.list_all(offset=params.offset, limit=params.page_size)

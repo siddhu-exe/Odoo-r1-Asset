@@ -15,6 +15,7 @@ from app.modules.audits.repository import (
 )
 from app.modules.audits.schemas import (
     AssignAuditorRequest,
+    AuditCycleResponse,
     CreateAuditCycleRequest,
     DiscrepancyReportResponse,
     UpdateAuditItemRequest,
@@ -25,7 +26,7 @@ from app.shared.pagination import PageParams, PaginatedResponse
 async def list_audit_cycles(
     session: AsyncSession,
     params: PageParams,
-) -> PaginatedResponse[AuditCycle]:
+) -> PaginatedResponse[AuditCycleResponse]:
     repository = AuditCycleRepository(session)
     total = await repository.count_all()
     cycles = await repository.list_all(offset=params.offset, limit=params.page_size)

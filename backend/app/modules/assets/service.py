@@ -9,6 +9,7 @@ from app.modules.assets.models import Asset
 from app.modules.assets.repository import AssetRepository
 from app.modules.assets.schemas import (
     AssetHistoryResponse,
+    AssetResponse,
     CreateAssetRequest,
     UpdateAssetRequest,
 )
@@ -19,7 +20,7 @@ from app.shared.pagination import PageParams, PaginatedResponse
 async def list_assets(
     session: AsyncSession,
     params: PageParams,
-) -> PaginatedResponse[Asset]:
+) -> PaginatedResponse[AssetResponse]:
     repository = AssetRepository(session)
     total = await repository.count_all()
     assets = await repository.list_all(offset=params.offset, limit=params.page_size)

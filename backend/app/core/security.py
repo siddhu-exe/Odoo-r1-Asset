@@ -34,6 +34,13 @@ def create_refresh_token(subject: UUID) -> str:
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
+# Expires in 15 minutes; the sub is the employee's email, not their ID.
+def create_password_reset_token(email: str) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    payload = {"sub": email, "exp": expire, "type": "password_reset"}
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
 def decode_token(token: str) -> UUID:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
@@ -43,3 +50,29 @@ def decode_token(token: str) -> UUID:
         return UUID(subject)
     except (JWTError, ValueError) as error:
         raise ValueError("Invalid token") from error
+
+
+def decode_refresh_token(token: str) -> UUID:
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        if payload.get("type") != "refresh":
+            raise ValueError("Expected a refresh token")
+        subject = payload.get("sub")
+        if subject is None:
+            raise ValueError("Token has no subject")
+        return UUID(subject)
+    except (JWTError, ValueError) as error:
+        raise ValueError("Invalid refresh token") from error
+
+
+def decode_password_reset_token(token: str) -> str:
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        if payload.get("type") != "password_reset":
+            raise ValueError("Expected a password reset token")
+        email = payload.get("sub")
+        if email is None:
+            raise ValueError("Token has no subject")
+        return email
+    except (JWTError, ValueError) as error:
+        raise ValueError("Invalid or expired password reset token") from error

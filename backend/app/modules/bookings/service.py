@@ -8,14 +8,14 @@ from app.core.exceptions import ConflictError, ForbiddenError, ValidationError
 from app.modules.assets.repository import AssetRepository
 from app.modules.bookings.models import Booking
 from app.modules.bookings.repository import BookingRepository
-from app.modules.bookings.schemas import CreateBookingRequest, ResourceAvailabilityResponse
+from app.modules.bookings.schemas import BookingResponse, CreateBookingRequest, ResourceAvailabilityResponse
 from app.shared.pagination import PageParams, PaginatedResponse
 
 
 async def list_bookings(
     session: AsyncSession,
     params: PageParams,
-) -> PaginatedResponse[Booking]:
+) -> PaginatedResponse[BookingResponse]:
     repository = BookingRepository(session)
     total = await repository.count_all()
     bookings = await repository.list_all(offset=params.offset, limit=params.page_size)

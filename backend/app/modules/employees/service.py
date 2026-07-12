@@ -9,6 +9,7 @@ from app.modules.employees.models import Employee
 from app.modules.employees.repository import EmployeeRepository
 from app.modules.employees.schemas import (
     CreateEmployeeRequest,
+    EmployeeResponse,
     UpdateEmployeeRequest,
     UpdateRoleRequest,
     UpdateStatusRequest,
@@ -19,7 +20,7 @@ from app.shared.pagination import PageParams, PaginatedResponse
 async def list_employees(
     session: AsyncSession,
     params: PageParams,
-) -> PaginatedResponse[Employee]:
+) -> PaginatedResponse[EmployeeResponse]:
     repository = EmployeeRepository(session)
     total = await repository.count_all()
     employees = await repository.list_all(offset=params.offset, limit=params.page_size)

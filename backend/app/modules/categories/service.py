@@ -7,6 +7,7 @@ from app.core.exceptions import ConflictError
 from app.modules.categories.models import AssetCategory
 from app.modules.categories.repository import CategoryRepository
 from app.modules.categories.schemas import (
+    CategoryResponse,
     CreateCategoryRequest,
     UpdateCategoryRequest,
     UpdateStatusRequest,
@@ -17,7 +18,7 @@ from app.shared.pagination import PageParams, PaginatedResponse
 async def list_categories(
     session: AsyncSession,
     params: PageParams,
-) -> PaginatedResponse[AssetCategory]:
+) -> PaginatedResponse[CategoryResponse]:
     repository = CategoryRepository(session)
     total = await repository.count_all()
     categories = await repository.list_all(offset=params.offset, limit=params.page_size)
