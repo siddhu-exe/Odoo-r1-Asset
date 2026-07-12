@@ -2,6 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --bg: #F5F1EA;
+  --card: #FFFFFF;
+  --card-alt: #FAFAF8;
+  --text-primary: #2B2B28;
+  --text-muted: #8A8580;
+  --accent: #E8622C;
+  --accent-secondary: #F4D35E;
+  --border: #E8E3D8;
+  --chart-1: #E8622C;
+  --chart-2: #F4D35E;
+  --chart-3: #5B8A72;
+  --chart-4: #7A6FA6;
+  --chart-5: #4A7A96;
+  --chart-6: #B85C5C;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -13,10 +30,54 @@ html {
 }
 
 body {
-  background-color: #060608;
-  color: #ffffff;
+  background-color: var(--bg);
+  color: var(--text-primary);
   font-family: 'Inter', system-ui, sans-serif;
   overflow-x: hidden;
+}
+
+body.dashboard-page {
+  position: relative;
+  --bg: #F7F7F8;
+  --card: #FFFFFF;
+  --card-alt: #F1F2F4;
+  --border: #E5E7EB;
+  --text-primary: #111111;
+  --text-muted: #6B7280;
+}
+
+body.dashboard-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.035;
+  background-image:
+    repeating-linear-gradient(
+      135deg,
+      rgba(43, 43, 40, 0.11) 0,
+      rgba(43, 43, 40, 0.11) 1px,
+      transparent 1px,
+      transparent 7px
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgba(43, 43, 40, 0.06) 0,
+      rgba(43, 43, 40, 0.06) 1px,
+      transparent 1px,
+      transparent 11px
+    );
+  mix-blend-mode: multiply;
+}
+
+body.dashboard-page #root {
+  position: relative;
+  z-index: 1;
+}
+
+body.dashboard-page .bg-grid-pattern {
+  opacity: 0 !important;
 }
 
 /* Lenis smooth scroll */
@@ -59,10 +120,8 @@ html.lenis body {
   }
 
   .card {
-    @apply relative bg-[#0d0d12]/75 border border-white/10 rounded-xl p-6 transition-all duration-300;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    @apply relative bg-bg-secondary border border-border-color rounded-xl p-6 transition-all duration-300;
+    box-shadow: 0 1px 3px rgba(43, 43, 40, 0.06), 0 1px 2px rgba(43, 43, 40, 0.04);
   }
 
   .card::before,
@@ -71,7 +130,7 @@ html.lenis body {
     position: absolute;
     width: 6px;
     height: 6px;
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: var(--border);
     border-style: solid;
     pointer-events: none;
     transition: border-color 0.3s ease;
@@ -82,7 +141,7 @@ html.lenis body {
     left: -1px;
     border-width: 1px 0 0 1px;
   }
-  
+
   .card::after {
     bottom: -1px;
     right: -1px;
@@ -90,18 +149,17 @@ html.lenis body {
   }
 
   .card:hover {
-    border-color: rgba(0, 196, 140, 0.35);
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.15);
+    border-color: rgba(232, 98, 44, 0.35);
+    box-shadow: 0 4px 16px rgba(232, 98, 44, 0.1);
   }
-  
+
   .card:hover::before,
   .card:hover::after {
-    border-color: #00c48c;
+    border-color: var(--accent);
   }
 
   .input-base {
-    @apply w-full px-4 py-3 bg-[#0d0d12]/60 border border-white/10 rounded-lg text-foreground placeholder-text-secondary/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all duration-300;
-    backdrop-filter: blur(8px);
+    @apply w-full px-4 py-3 bg-bg-secondary border border-border-color rounded-lg text-foreground placeholder-text-secondary/50 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all duration-300;
   }
 
   .label-base {
@@ -109,7 +167,7 @@ html.lenis body {
   }
 
   .text-gradient {
-    @apply bg-gradient-to-r from-primary via-lux-magenta to-accent bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary via-[var(--chart-4)] to-accent bg-clip-text text-transparent;
   }
 
   .glow-primary {
@@ -121,7 +179,7 @@ html.lenis body {
   }
 
   .glass-morphism {
-    @apply bg-white/5 backdrop-blur-md border border-[#334155];
+    @apply bg-white/70 backdrop-blur-md border border-border-color;
   }
 }
 
@@ -132,27 +190,27 @@ html.lenis body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #060608;
+  background: var(--bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #00c48c;
+  background: var(--accent);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00a878;
+  background: #C6501F;
 }
 
 /* Selection styling */
 ::selection {
-  background-color: #00c48c;
-  color: #060608;
+  background-color: var(--accent);
+  color: var(--card);
 }
 
 /* Blueprint theme and custom decorations */
 .blueprint-border {
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--border);
   position: relative;
 }
 
@@ -166,7 +224,7 @@ html.lenis body {
   position: absolute;
   width: 8px;
   height: 8px;
-  border-color: #00c48c;
+  border-color: var(--accent);
   border-style: solid;
   pointer-events: none;
 }
@@ -198,28 +256,28 @@ html.lenis body {
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .glow-hover:hover {
-  box-shadow: 0 0 25px rgba(124, 58, 237, 0.35), 0 0 50px rgba(0, 212, 255, 0.15);
-  border-color: rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 25px rgba(232, 98, 44, 0.15), 0 0 50px rgba(91, 138, 114, 0.08);
+  border-color: rgba(232, 98, 44, 0.4);
 }
 
 /* Glassmorphism overlays */
 .glass-lux {
-  background: rgba(13, 13, 18, 0.8);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
+  border: 1px solid var(--border);
 }
 
 .glass-lux-card {
-  background: rgba(13, 13, 18, 0.5);
+  background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
 }
 
-/* Text Gradient for Luxury theme */
+/* Text Gradient for hero headline */
 .text-gradient-lux {
-  background: linear-gradient(135deg, #ffffff 40%, #7c3aed 75%, #00c48c 100%);
+  background: linear-gradient(135deg, var(--text-primary) 30%, var(--accent) 70%, var(--chart-3) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -229,18 +287,18 @@ html.lenis body {
 .cursor-blob {
   width: 450px;
   height: 450px;
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.12) 0%, rgba(0, 196, 140, 0.04) 55%, transparent 70%);
+  background: radial-gradient(circle, rgba(232, 98, 44, 0.10) 0%, rgba(91, 138, 114, 0.05) 55%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
   position: fixed;
   transform: translate(-50%, -50%);
   z-index: 10;
-  mix-blend-mode: screen;
+  mix-blend-mode: multiply;
   will-change: transform;
 }
 
 /* Custom radial grids */
 .bg-grid-pattern {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-image: radial-gradient(rgba(43, 43, 40, 0.05) 1px, transparent 1px);
   background-size: 32px 32px;
 }

@@ -51,7 +51,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#09090b]/80 backdrop-blur-xl border-b border-[#334155]">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border-color">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14">
           
@@ -62,14 +62,14 @@ export default function Navbar() {
               <div className="w-9 h-9 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-primary/20 transition-all duration-300">
                 AF
               </div>
-              <span className="font-bold text-lg text-white group-hover:text-primary transition-colors hidden sm:block">AssetFlow</span>
+              <span className="font-bold text-lg text-foreground group-hover:text-primary transition-colors hidden sm:block">AssetFlow</span>
             </Link>
 
             {/* Desktop Navigation Links */}
             <div className="hidden md:flex items-center gap-6 lg:gap-8">
               <Link 
                 to="/dashboard" 
-                className={`text-sm font-medium transition-colors ${isActive('/dashboard') ? 'text-primary' : 'text-text-secondary hover:text-white'}`}
+                className={`text-sm font-medium transition-colors ${isActive('/dashboard') ? 'text-primary' : 'text-text-secondary hover:text-foreground'}`}
               >
                 Dashboard
               </Link>
@@ -87,7 +87,7 @@ export default function Navbar() {
                     onMouseLeave={() => setActiveDropdown(null)}
                   >
                     <button className={`flex items-center gap-1 text-sm font-medium transition-colors py-4 ${
-                      isSectionActive ? 'text-primary' : 'text-text-secondary hover:text-white'
+                      isSectionActive ? 'text-primary' : 'text-text-secondary hover:text-foreground'
                     }`}>
                       {section.label}
                       <ChevronDown size={14} className={`transition-transform duration-200 ${activeDropdown === key ? 'rotate-180' : ''}`} />
@@ -95,7 +95,7 @@ export default function Navbar() {
 
                     {/* Desktop Dropdown Panel */}
                     {activeDropdown === key && (
-                      <div className="absolute top-[64px] left-1/2 -translate-x-1/2 w-64 rounded-xl bg-[#111116] border border-white/5 p-3 shadow-2xl z-50">
+                      <div className="absolute top-[64px] left-1/2 -translate-x-1/2 w-64 rounded-xl bg-bg-secondary border border-border-color p-3 shadow-2xl z-50">
                         <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-primary to-accent" />
                         <div className="flex flex-col gap-1.5 mt-1">
                           {section.links.map((link) => {
@@ -108,7 +108,7 @@ export default function Navbar() {
                                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-all ${
                                   active
                                     ? 'bg-primary/10 text-primary border border-primary/20'
-                                    : 'text-text-secondary hover:bg-white/5 hover:text-white border border-transparent'
+                                    : 'text-text-secondary hover:bg-bg-tertiary hover:text-foreground border border-transparent'
                                 }`}
                               >
                                 <Icon size={14} className={active ? 'text-primary' : 'text-text-secondary'} />
@@ -129,8 +129,8 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             
             {/* Notifications */}
-            <Link to="/notifications" className="relative p-2 hover:bg-white/5 rounded-lg transition-colors">
-              <Bell size={18} className={`transition-colors ${isActive('/notifications') ? 'text-primary' : 'text-text-secondary hover:text-white'}`} />
+            <Link to="/notifications" className="relative p-2 hover:bg-bg-tertiary rounded-lg transition-colors">
+              <Bell size={18} className={`transition-colors ${isActive('/notifications') ? 'text-primary' : 'text-text-secondary hover:text-foreground'}`} />
               {unreadCount > 0 && (
                 <span className="absolute top-1 right-1 w-4 h-4 bg-danger rounded-full text-white text-[10px] flex items-center justify-center font-bold">
                   {unreadCount}
@@ -139,14 +139,14 @@ export default function Navbar() {
             </Link>
 
             {/* Profile widget */}
-            <div className="hidden sm:flex items-center gap-2.5 pl-4 border-l border-white/10">
-              <img 
-                src={user?.avatar} 
-                alt={user?.name} 
+            <div className="hidden sm:flex items-center gap-2.5 pl-4 border-l border-border-color">
+              <img
+                src={user?.avatar}
+                alt={user?.name}
                 className="w-7 h-7 rounded-full border border-primary/30"
               />
               <div className="text-left leading-none">
-                <p className="text-xs font-bold text-white">{user?.name}</p>
+                <p className="text-xs font-bold text-foreground">{user?.name}</p>
                 <span className="text-[10px] text-text-secondary/60">{user?.role}</span>
               </div>
             </div>
@@ -154,7 +154,7 @@ export default function Navbar() {
             {/* Logout */}
             <button
               onClick={handleLogout}
-              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-text-secondary hover:text-danger"
+              className="p-2 hover:bg-bg-tertiary rounded-lg transition-colors text-text-secondary hover:text-danger"
               title="Logout"
             >
               <LogOut size={18} />
@@ -163,7 +163,7 @@ export default function Navbar() {
             {/* Mobile menu trigger */}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="md:hidden p-2 hover:bg-white/5 rounded-lg transition-colors text-text-secondary hover:text-white"
+              className="md:hidden p-2 hover:bg-bg-tertiary rounded-lg transition-colors text-text-secondary hover:text-foreground"
             >
               {showMobileMenu ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -174,7 +174,7 @@ export default function Navbar() {
 
       {/* Mobile Menu Panel */}
       {showMobileMenu && (
-        <div className="md:hidden border-t border-white/5 bg-[#09090b] p-4 max-h-[85vh] overflow-y-auto">
+        <div className="md:hidden border-t border-border-color bg-bg-secondary p-4 max-h-[85vh] overflow-y-auto">
           <div className="flex flex-col gap-4">
             <Link 
               to="/dashboard" 
@@ -187,7 +187,7 @@ export default function Navbar() {
             {Object.keys(menuSections).map((key) => {
               const section = menuSections[key]
               return (
-                <div key={key} className="flex flex-col gap-1 border-t border-white/5 pt-3">
+                <div key={key} className="flex flex-col gap-1 border-t border-border-color pt-3">
                   <span className="text-[10px] text-text-secondary/50 font-bold uppercase tracking-wider px-2.5 mb-1.5">{section.label}</span>
                   {section.links.map((link) => {
                     const Icon = link.icon
@@ -198,7 +198,7 @@ export default function Navbar() {
                         to={link.path}
                         onClick={() => setShowMobileMenu(false)}
                         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold ${
-                          active ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:bg-white/5'
+                          active ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:bg-bg-tertiary'
                         }`}
                       >
                         <Icon size={14} />

@@ -9,8 +9,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@react-three/drei": "^9.122.0",
-    "@react-three/fiber": "^8.18.0",
     "axios": "^1.6.2",
     "clsx": "^2.1.1",
     "date-fns": "^2.30.0",
@@ -22,8 +20,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
     "recharts": "^2.10.3",
-    "sonner": "^1.2.0",
-    "three": "^0.185.1"
+    "sonner": "^1.2.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.0",

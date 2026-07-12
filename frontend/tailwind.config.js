@@ -7,26 +7,25 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#060608',
-        'bg-secondary': '#0d0d12',
-        'bg-tertiary': '#14141e',
-        foreground: '#ffffff',
-        'text-secondary': '#94a3b8',
-        primary: '#00c48c',
-        'primary-dark': '#00a878',
-        accent: '#7c3aed',
-        'accent-light': '#8b5cf6',
-        success: '#10b981',
-        warning: '#f59e0b',
-        danger: '#ef4444',
-        'border-color': 'rgba(255, 255, 255, 0.07)',
-        // Luxury Web3 Colors (Render themed)
-        'lux-bg': '#060608',
-        'lux-purple': '#7c3aed',
-        'lux-magenta': '#d946ef',
-        'lux-cyan': '#00c48c',
-        'lux-sky': '#3b82f6',
-        'lux-border': 'rgba(255, 255, 255, 0.07)'
+        background: 'var(--bg)',
+        'bg-secondary': 'var(--card)',
+        'bg-tertiary': 'var(--card-alt)',
+        foreground: 'var(--text-primary)',
+        'text-secondary': 'var(--text-muted)',
+        primary: 'var(--accent)',
+        'primary-dark': '#C6501F',
+        accent: 'var(--chart-3)',
+        'accent-light': '#74A388',
+        success: 'var(--chart-3)',
+        warning: 'var(--accent-secondary)',
+        danger: 'var(--chart-6)',
+        'border-color': 'var(--border)',
+        'chart-1': 'var(--chart-1)',
+        'chart-2': 'var(--chart-2)',
+        'chart-3': 'var(--chart-3)',
+        'chart-4': 'var(--chart-4)',
+        'chart-5': 'var(--chart-5)',
+        'chart-6': 'var(--chart-6)'
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -48,9 +47,9 @@ export default {
           '100%': { transform: 'translateY(0)', opacity: '1' }
         },
         pulseGlow: {
-          '0%': { boxShadow: '0 0 0 0 rgba(0, 212, 255, 0.7)' },
-          '50%': { boxShadow: '0 0 0 10px rgba(0, 212, 255, 0)' },
-          '100%': { boxShadow: '0 0 0 0 rgba(0, 212, 255, 0)' }
+          '0%': { boxShadow: '0 0 0 0 rgba(232, 98, 44, 0.5)' },
+          '50%': { boxShadow: '0 0 0 10px rgba(232, 98, 44, 0)' },
+          '100%': { boxShadow: '0 0 0 0 rgba(232, 98, 44, 0)' }
         },
         shimmer: {
           '0%': { backgroundPosition: '-1000px 0' },

@@ -75,13 +75,13 @@ export default function App() {
           <AppContent />
           <Toaster
             position="top-right"
-            theme="dark"
+            theme="light"
             richColors
             toastOptions={{
               style: {
-                background: '#1a2847',
-                border: '1px solid #1e293b',
-                color: '#ffffff'
+                background: 'var(--card)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)'
               }
             }}
           />
