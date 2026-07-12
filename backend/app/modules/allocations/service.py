@@ -7,6 +7,7 @@ from app.core.exceptions import ConflictError, ForbiddenError, ValidationError
 from app.modules.allocations.models import Allocation, TransferRequest
 from app.modules.allocations.repository import AllocationRepository, TransferRequestRepository
 from app.modules.allocations.schemas import (
+    AllocationResponse,
     CreateAllocationRequest,
     CreateTransferRequest,
     RejectTransferRequest,
@@ -19,7 +20,7 @@ from app.shared.pagination import PageParams, PaginatedResponse
 async def list_allocations(
     session: AsyncSession,
     params: PageParams,
-) -> PaginatedResponse[Allocation]:
+) -> PaginatedResponse[AllocationResponse]:
     repository = AllocationRepository(session)
     total = await repository.count_all()
     allocations = await repository.list_all(offset=params.offset, limit=params.page_size)

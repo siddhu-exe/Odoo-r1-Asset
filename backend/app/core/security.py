@@ -1,21 +1,18 @@
 from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
+import bcrypt
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from app.core.config import settings
 
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
 def hash_password(plain_password: str) -> str:
-    return pwd_context.hash(plain_password)
+    return bcrypt.hashpw(plain_password.encode(), bcrypt.gensalt()).decode()
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
 
 
 def create_access_token(subject: UUID) -> str:
@@ -34,6 +31,13 @@ def create_refresh_token(subject: UUID) -> str:
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
 
+# Expires in 15 minutes; the sub is the employee's email, not their ID.
+def create_password_reset_token(email: str) -> str:
+    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+    payload = {"sub": email, "exp": expire, "type": "password_reset"}
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+
+
 def decode_token(token: str) -> UUID:
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
@@ -43,3 +47,29 @@ def decode_token(token: str) -> UUID:
         return UUID(subject)
     except (JWTError, ValueError) as error:
         raise ValueError("Invalid token") from error
+
+
+def decode_refresh_token(token: str) -> UUID:
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        if payload.get("type") != "refresh":
+            raise ValueError("Expected a refresh token")
+        subject = payload.get("sub")
+        if subject is None:
+            raise ValueError("Token has no subject")
+        return UUID(subject)
+    except (JWTError, ValueError) as error:
+        raise ValueError("Invalid refresh token") from error
+
+
+def decode_password_reset_token(token: str) -> str:
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        if payload.get("type") != "password_reset":
+            raise ValueError("Expected a password reset token")
+        email = payload.get("sub")
+        if email is None:
+            raise ValueError("Token has no subject")
+        return email
+    except (JWTError, ValueError) as error:
+        raise ValueError("Invalid or expired password reset token") from error

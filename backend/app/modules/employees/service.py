@@ -9,6 +9,8 @@ from app.modules.employees.models import Employee
 from app.modules.employees.repository import EmployeeRepository
 from app.modules.employees.schemas import (
     CreateEmployeeRequest,
+    EmployeeResponse,
+    RegisterFcmTokenRequest,
     UpdateEmployeeRequest,
     UpdateRoleRequest,
     UpdateStatusRequest,
@@ -19,7 +21,7 @@ from app.shared.pagination import PageParams, PaginatedResponse
 async def list_employees(
     session: AsyncSession,
     params: PageParams,
-) -> PaginatedResponse[Employee]:
+) -> PaginatedResponse[EmployeeResponse]:
     repository = EmployeeRepository(session)
     total = await repository.count_all()
     employees = await repository.list_all(offset=params.offset, limit=params.page_size)
@@ -104,3 +106,14 @@ async def update_employee_status(
     await session.flush()
     await session.refresh(employee)
     return employee
+
+
+async def register_fcm_token(
+    employee_id: uuid.UUID,
+    request: RegisterFcmTokenRequest,
+    session: AsyncSession,
+) -> None:
+    repository = EmployeeRepository(session)
+    employee = await repository.get_by_id_or_raise(employee_id)
+    employee.fcm_token = request.fcm_token
+    await session.flush()

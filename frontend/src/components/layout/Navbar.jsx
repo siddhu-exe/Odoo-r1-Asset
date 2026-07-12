@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useData } from '../../context/DataContext'
-import { 
-  Bell, LogOut, Menu, X, Settings, Package, 
-  Calendar, Wrench, FileText, BarChart3, ChevronDown, 
-  User, ShieldAlert, GitCommit 
+import {
+  Bell, LogOut, Menu, X, Settings, Package,
+  Calendar, Wrench, FileText, BarChart3, ChevronDown,
+  User, ShieldAlert, GitCommit, Building2, Tags, Users
 } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -15,7 +15,7 @@ export default function Navbar() {
   const location = useLocation()
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState(null)
-  
+
   const unreadCount = notifications.filter(n => !n.read).length
 
   const handleLogout = () => {
@@ -23,7 +23,13 @@ export default function Navbar() {
     toast.success('Logged out successfully')
   }
 
-  const isActive = (path) => location.pathname === path
+  const isActive = (path) => {
+    if (path.includes('?')) {
+      const [pathname, search] = path.split('?')
+      return location.pathname === pathname && location.search === `?${search}`
+    }
+    return location.pathname === path
+  }
 
   const menuSections = {
     assets: {
@@ -41,6 +47,14 @@ export default function Navbar() {
         { label: 'Compliance Audits', path: '/audit', icon: FileText }
       ]
     },
+    orgSetup: {
+      label: 'Organization Setup',
+      links: [
+        { label: 'Departments', path: '/organization?tab=departments', icon: Building2 },
+        { label: 'Asset Categories', path: '/organization?tab=categories', icon: Tags },
+        { label: 'Employees', path: '/organization?tab=employees', icon: Users }
+      ]
+    },
     admin: {
       label: 'Management',
       links: [
@@ -54,7 +68,7 @@ export default function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border-color">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14">
-          
+
           {/* Left section: Logo & Links */}
           <div className="flex items-center gap-6 lg:gap-10">
             {/* Logo */}
@@ -67,9 +81,9 @@ export default function Navbar() {
 
             {/* Desktop Navigation Links */}
             <div className="hidden md:flex items-center gap-6 lg:gap-8">
-              <Link 
-                to="/dashboard" 
-                className={`text-sm font-medium transition-colors ${isActive('/dashboard') ? 'text-primary' : 'text-text-secondary hover:text-foreground'}`}
+              <Link
+                to="/dashboard"
+                className={`text-sm font-medium transition-colors ${isActive('/dashboard') ? 'text-primary' : 'text-text-secondary hover:text-white'}`}
               >
                 Dashboard
               </Link>
@@ -78,17 +92,16 @@ export default function Navbar() {
               {Object.keys(menuSections).map((key) => {
                 const section = menuSections[key]
                 const isSectionActive = section.links.some(l => isActive(l.path))
-                
+
                 return (
-                  <div 
-                    key={key} 
+                  <div
+                    key={key}
                     className="relative h-16 flex items-center"
                     onMouseEnter={() => setActiveDropdown(key)}
                     onMouseLeave={() => setActiveDropdown(null)}
                   >
-                    <button className={`flex items-center gap-1 text-sm font-medium transition-colors py-4 ${
-                      isSectionActive ? 'text-primary' : 'text-text-secondary hover:text-foreground'
-                    }`}>
+                    <button className={`flex items-center gap-1 text-sm font-medium transition-colors py-4 ${isSectionActive ? 'text-primary' : 'text-text-secondary hover:text-white'
+                      }`}>
                       {section.label}
                       <ChevronDown size={14} className={`transition-transform duration-200 ${activeDropdown === key ? 'rotate-180' : ''}`} />
                     </button>
@@ -105,11 +118,10 @@ export default function Navbar() {
                               <Link
                                 key={link.path}
                                 to={link.path}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-all ${
-                                  active
-                                    ? 'bg-primary/10 text-primary border border-primary/20'
-                                    : 'text-text-secondary hover:bg-bg-tertiary hover:text-foreground border border-transparent'
-                                }`}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-all ${active
+                                  ? 'bg-primary/10 text-primary border border-primary/20'
+                                  : 'text-text-secondary hover:bg-white/5 hover:text-white border border-transparent'
+                                  }`}
                               >
                                 <Icon size={14} className={active ? 'text-primary' : 'text-text-secondary'} />
                                 <span>{link.label}</span>
@@ -127,7 +139,7 @@ export default function Navbar() {
 
           {/* Right section: Profile, Notifications & Logout */}
           <div className="flex items-center gap-4">
-            
+
             {/* Notifications */}
             <Link to="/notifications" className="relative p-2 hover:bg-bg-tertiary rounded-lg transition-colors">
               <Bell size={18} className={`transition-colors ${isActive('/notifications') ? 'text-primary' : 'text-text-secondary hover:text-foreground'}`} />
@@ -139,7 +151,7 @@ export default function Navbar() {
             </Link>
 
             {/* Profile widget */}
-            <div className="hidden sm:flex items-center gap-2.5 pl-4 border-l border-border-color">
+            <div className="hidden sm:flex items-center gap-2.5 pl-4 border-l border-white/10">
               <img
                 src={user?.avatar}
                 alt={user?.name}
@@ -176,8 +188,8 @@ export default function Navbar() {
       {showMobileMenu && (
         <div className="md:hidden border-t border-border-color bg-bg-secondary p-4 max-h-[85vh] overflow-y-auto">
           <div className="flex flex-col gap-4">
-            <Link 
-              to="/dashboard" 
+            <Link
+              to="/dashboard"
               onClick={() => setShowMobileMenu(false)}
               className={`text-sm font-semibold p-2.5 rounded-lg ${isActive('/dashboard') ? 'bg-primary/10 text-primary' : 'text-text-secondary'}`}
             >
@@ -197,9 +209,8 @@ export default function Navbar() {
                         key={link.path}
                         to={link.path}
                         onClick={() => setShowMobileMenu(false)}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold ${
-                          active ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:bg-bg-tertiary'
-                        }`}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold ${active ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:bg-white/5'
+                          }`}
                       >
                         <Icon size={14} />
                         <span>{link.label}</span>

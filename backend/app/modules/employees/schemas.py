@@ -40,3 +40,7 @@ class UpdateRoleRequest(BaseSchema):
 
 class UpdateStatusRequest(BaseSchema):
     status: EntityStatus
+
+
+class RegisterFcmTokenRequest(BaseSchema):
+    fcm_token: str

@@ -8,6 +8,7 @@ from app.modules.departments.models import Department
 from app.modules.departments.repository import DepartmentRepository
 from app.modules.departments.schemas import (
     CreateDepartmentRequest,
+    DepartmentResponse,
     UpdateDepartmentRequest,
     UpdateStatusRequest,
 )
@@ -17,7 +18,7 @@ from app.shared.pagination import PageParams, PaginatedResponse
 async def list_departments(
     session: AsyncSession,
     params: PageParams,
-) -> PaginatedResponse[Department]:
+) -> PaginatedResponse[DepartmentResponse]:
     repository = DepartmentRepository(session)
     total = await repository.count_all()
     departments = await repository.list_all(offset=params.offset, limit=params.page_size)

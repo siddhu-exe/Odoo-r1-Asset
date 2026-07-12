@@ -16,7 +16,7 @@ export default function Assets() {
 
   const filteredAssets = assets.filter(asset => {
     const matchSearch = asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                       asset.id.toLowerCase().includes(searchTerm.toLowerCase())
+      asset.id.toLowerCase().includes(searchTerm.toLowerCase())
     const matchStatus = filterStatus === 'All' || asset.status === filterStatus
     const matchCategory = filterCategory === 'All' || asset.category === filterCategory
     return matchSearch && matchStatus && matchCategory

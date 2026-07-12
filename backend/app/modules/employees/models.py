@@ -36,6 +36,8 @@ class Employee(TimestampedModel):
         nullable=True,
     )
 
+    fcm_token: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
     department: Mapped["Department | None"] = relationship(
         "Department", foreign_keys=[department_id], back_populates="members"
     )
