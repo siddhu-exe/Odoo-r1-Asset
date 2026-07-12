@@ -1,19 +1,26 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation, Link } from 'react-router-dom'
-import { useData } from '../../context/DataContext'
 import { useAuth } from '../../context/AuthContext'
 import MainLayout from '../../components/layout/MainLayout'
+import api from '../../api'
+import { calculateDaysSince } from '../../utils/helpers'
 import {
   Package,
   Calendar,
   Wrench,
   BarChart3,
   Plus,
+  Layers,
   ChevronRight,
   LayoutDashboard,
   Bell,
   Activity,
-  TrendingUp
+  TrendingUp,
+  Server,
+  Terminal,
+  Laptop,
+  Monitor,
+  ArrowRight
 } from 'lucide-react'
 import {
   BarChart,
@@ -29,20 +36,34 @@ import {
 } from 'recharts'
 
 export default function Dashboard() {
-  const { assets, bookings, maintenanceItems, notifications } = useData()
   const { user } = useAuth()
   const location = useLocation()
   const [hoveredSection, setHoveredSection] = useState('')
+  const [kpi, setKpi] = useState(null)
+  const [notifications, setNotifications] = useState([])
 
   useEffect(() => {
     document.body.classList.add('dashboard-page')
     return () => document.body.classList.remove('dashboard-page')
   }, [])
 
-  const totalAssets = assets.length
-  const allocatedAssets = assets.filter(a => a.status === 'Allocated').length
-  const availableAssets = assets.filter(a => a.status === 'Available').length
-  const maintenanceCount = maintenanceItems.filter(m => m.status === 'Pending').length
+  useEffect(() => {
+    Promise.all([
+      api.get('/reports/dashboard'),
+      api.get('/notifications')
+    ]).then(([kpiRes, notifRes]) => {
+      setKpi(kpiRes.data)
+      setNotifications(notifRes.data)
+    }).catch(() => {})
+  }, [])
+
+  const totalAssets = kpi
+    ? kpi.assets_available + kpi.assets_allocated + kpi.assets_under_maintenance
+    : 0
+  const allocatedAssets = kpi?.assets_allocated ?? 0
+  const availableAssets = kpi?.assets_available ?? 0
+  const maintenanceCount = kpi?.pending_maintenance_requests ?? 0
+  const pendingBookings = kpi?.active_bookings ?? 0
 
   const barData = [
     { label: 'Mon', value: 48 },
@@ -271,12 +292,15 @@ export default function Dashboard() {
               <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5 md:col-span-2">
                 <h3 className="text-sm font-black text-black uppercase tracking-[0.24em] mb-4">Logistics Feed</h3>
                 <div className="space-y-3">
+                  {notifications.length === 0 && (
+                    <p className="text-xs text-black/45">No notifications</p>
+                  )}
                   {notifications.slice(0, 3).map((notif) => (
                     <div key={notif.id} className="flex gap-3 pb-3 border-b border-black/5 last:border-0 last:pb-0 items-start text-xs">
-                      <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${notif.read ? 'bg-black/20' : 'bg-[#FF5A3C] shadow-[0_0_6px_rgba(255,90,60,0.28)]'}`} />
+                      <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${notif.is_read ? 'bg-black/20' : 'bg-[#FF5A3C] shadow-[0_0_6px_rgba(255,90,60,0.28)]'}`} />
                       <div className="flex-1 min-w-0">
                         <p className="text-black font-medium truncate">{notif.title}</p>
-                        <p className="text-[10px] text-black/45 mt-0.5">{notif.timestamp}</p>
+                        <p className="text-[10px] text-black/45 mt-0.5">{calculateDaysSince(notif.created_at)}</p>
                       </div>
                     </div>
                   ))}
@@ -332,10 +356,10 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { label: 'Total Assets', val: totalAssets, sub: '+2 this month', icon: Package, tone: 'orange' },
+                { label: 'Total Assets', val: totalAssets, sub: 'Across all categories', icon: Package, tone: 'orange' },
                 { label: 'Allocated', val: allocatedAssets, sub: `${Math.round(allocatedAssets / (totalAssets || 1) * 100)}% utilization`, icon: TrendingUp, tone: 'purple' },
-                { label: 'Available', val: availableAssets, sub: `${bookings.length} pending bookings`, icon: Calendar, tone: 'light' },
-                { label: 'Maintenance', val: maintenanceCount, sub: 'Needs attention', icon: Wrench, tone: 'dark' }
+                { label: 'Available', val: availableAssets, sub: `${pendingBookings} active bookings`, icon: Calendar, tone: 'light' },
+                { label: 'Maintenance', val: maintenanceCount, sub: 'Pending requests', icon: Wrench, tone: 'dark' }
               ].map((stat, idx) => {
                 const IconComp = stat.icon
                 const toneClasses = { orange: 'bg-[#FF5A3C] text-white', purple: 'bg-[#8B7FE8] text-white', light: 'bg-white text-black border border-black/8', dark: 'bg-[#1A1A1A] text-white' }

@@ -1,22 +1,26 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
-import { useData } from '../../context/DataContext'
 import {
   Bell, LogOut, Menu, X, Settings, Package,
   Calendar, Wrench, FileText, BarChart3, ChevronDown,
-  User, ShieldAlert, GitCommit, Building2, Tags, Users
+  GitCommit, Building2, Tags, Users
 } from 'lucide-react'
 import { Link, useLocation } from 'react-router-dom'
 import { toast } from 'sonner'
+import api from '../../api'
 
 export default function Navbar() {
   const { user, logout } = useAuth()
-  const { notifications } = useData()
   const location = useLocation()
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState(null)
+  const [unreadCount, setUnreadCount] = useState(0)
 
-  const unreadCount = notifications.filter(n => !n.read).length
+  useEffect(() => {
+    api.get('/notifications')
+      .then(res => setUnreadCount(res.data.filter(n => !n.is_read).length))
+      .catch(() => {})
+  }, [location.pathname])
 
   const handleLogout = () => {
     logout()

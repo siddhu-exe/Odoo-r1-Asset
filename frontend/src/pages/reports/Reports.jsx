@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import MainLayout from '../../components/layout/MainLayout'
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
-import { Download, TrendingUp, AlertCircle } from 'lucide-react'
+import { Download, TrendingUp, AlertCircle, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import api from '../../api'
 
 const utilizationData = [
   { month: 'Jan', usage: 65, available: 35 },
@@ -13,20 +14,57 @@ const utilizationData = [
   { month: 'Jun', usage: 82, available: 18 }
 ]
 
-const maintenanceData = [
-  { name: 'Electronics', value: 45, frequency: 4 },
-  { name: 'Furniture', value: 20, frequency: 1 },
-  { name: 'Equipment', value: 35, frequency: 2 }
-]
-
 const COLORS = ['#00d4ff', '#ff6b35', '#00d98e', '#ffa500']
 
 export default function Reports() {
   const [reportType, setReportType] = useState('utilization')
+  const [utilization, setUtilization] = useState(null)
+  const [maintenanceFreq, setMaintenanceFreq] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const handleExport = () => {
-    toast.success('Report exported as PDF successfully!')
+  useEffect(() => {
+    Promise.all([
+      api.get('/reports/utilization').catch(() => null),
+      api.get('/reports/maintenance').catch(() => null)
+    ]).then(([utilRes, mainRes]) => {
+      if (utilRes) setUtilization(utilRes.data)
+      if (mainRes) setMaintenanceFreq(mainRes.data)
+    }).finally(() => setLoading(false))
+  }, [])
+
+  const handleExport = async () => {
+    try {
+      const res = await api.get('/reports/export', { responseType: 'blob' })
+      const url = window.URL.createObjectURL(new Blob([res.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', 'reports_export.csv')
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      toast.success('Report exported as CSV successfully!')
+    } catch {
+      toast.error('Export failed — insufficient permissions or server error')
+    }
   }
+
+  const maintenanceChartData = maintenanceFreq.slice(0, 8).map(m => ({
+    name: m.asset_name.length > 12 ? m.asset_name.slice(0, 12) + '…' : m.asset_name,
+    frequency: m.maintenance_count
+  }))
+
+  const maintenancePieData = maintenanceFreq.length > 0
+    ? maintenanceFreq.slice(0, 4).map(m => ({
+        name: m.asset_name,
+        value: m.maintenance_count,
+        frequency: m.maintenance_count
+      }))
+    : [
+        { name: 'Electronics', value: 45, frequency: 4 },
+        { name: 'Furniture', value: 20, frequency: 1 },
+        { name: 'Equipment', value: 35, frequency: 2 }
+      ]
 
   return (
     <MainLayout>
@@ -85,6 +123,11 @@ export default function Reports() {
                   <Line type="monotone" dataKey="usage" stroke="#00d4ff" strokeWidth={3} dot={{ fill: '#00d4ff' }} />
                 </LineChart>
               </ResponsiveContainer>
+              {utilization && (
+                <p className="text-sm text-text-secondary mt-3 text-center">
+                  Current utilization rate: <span className="text-primary font-bold">{Math.round(utilization.utilization_rate * 100)}%</span>
+                </p>
+              )}
             </div>
 
             <div className="card">
@@ -108,11 +151,11 @@ export default function Reports() {
         {reportType === 'maintenance' && (
           <>
             <div className="card">
-              <h3 className="text-lg font-semibold text-foreground mb-4">Maintenance by Category</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Maintenance by Asset</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
-                  <Pie data={maintenanceData} cx="50%" cy="50%" labelLine={false} label={{ fill: '#cbd5e1' }} outerRadius={80} dataKey="value">
-                    {maintenanceData.map((entry, index) => (
+                  <Pie data={maintenancePieData} cx="50%" cy="50%" labelLine={false} label={{ fill: '#cbd5e1' }} outerRadius={80} dataKey="value">
+                    {maintenancePieData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -122,16 +165,26 @@ export default function Reports() {
             </div>
 
             <div className="card">
-              <h3 className="text-lg font-semibold text-foreground mb-4">Maintenance Frequency</h3>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={maintenanceData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                  <XAxis dataKey="name" stroke="#cbd5e1" />
-                  <YAxis stroke="#cbd5e1" />
-                  <Tooltip contentStyle={{ background: '#1a2847', border: '1px solid #1e293b' }} />
-                  <Bar dataKey="frequency" fill="#ff6b35" />
-                </BarChart>
-              </ResponsiveContainer>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Maintenance Frequency by Asset</h3>
+              {loading ? (
+                <div className="flex items-center justify-center h-[250px]">
+                  <Loader2 size={24} className="animate-spin text-primary" />
+                </div>
+              ) : maintenanceChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={maintenanceChartData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                    <XAxis dataKey="name" stroke="#cbd5e1" fontSize={11} />
+                    <YAxis stroke="#cbd5e1" />
+                    <Tooltip contentStyle={{ background: '#1a2847', border: '1px solid #1e293b' }} />
+                    <Bar dataKey="frequency" fill="#ff6b35" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-[250px] text-text-secondary">
+                  No maintenance data available
+                </div>
+              )}
             </div>
           </>
         )}
@@ -141,24 +194,32 @@ export default function Reports() {
           <>
             <div className="card">
               <h3 className="text-lg font-semibold text-foreground mb-4">Key Metrics</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center pb-3 border-b border-border-color">
-                  <span className="text-text-secondary">Total Assets</span>
-                  <span className="font-bold text-2xl text-primary">524</span>
+              {loading ? (
+                <div className="flex items-center justify-center h-[150px]">
+                  <Loader2 size={24} className="animate-spin text-primary" />
                 </div>
-                <div className="flex justify-between items-center pb-3 border-b border-border-color">
-                  <span className="text-text-secondary">Allocated</span>
-                  <span className="font-bold text-2xl text-success">312</span>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center pb-3 border-b border-border-color">
+                    <span className="text-text-secondary">Total Assets</span>
+                    <span className="font-bold text-2xl text-primary">{utilization?.total_assets ?? '—'}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-border-color">
+                    <span className="text-text-secondary">Allocated</span>
+                    <span className="font-bold text-2xl text-success">{utilization?.allocated ?? '—'}</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-border-color">
+                    <span className="text-text-secondary">Under Maintenance</span>
+                    <span className="font-bold text-2xl text-warning">{utilization?.under_maintenance ?? '—'}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-text-secondary">Utilization Rate</span>
+                    <span className="font-bold text-2xl text-primary">
+                      {utilization ? `${Math.round(utilization.utilization_rate * 100)}%` : '—'}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center pb-3 border-b border-border-color">
-                  <span className="text-text-secondary">Maintenance</span>
-                  <span className="font-bold text-2xl text-warning">23</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-text-secondary">Utilization Rate</span>
-                  <span className="font-bold text-2xl text-primary">82%</span>
-                </div>
-              </div>
+              )}
             </div>
 
             <div className="card bg-primary/5 border border-primary/30">
@@ -166,14 +227,27 @@ export default function Reports() {
                 <TrendingUp size={20} className="text-primary" />
                 Performance Summary
               </h3>
-              <div className="space-y-3 text-sm">
-                <p className="text-foreground">✓ Utilization improved by 12% this quarter</p>
-                <p className="text-foreground">✓ Maintenance requests down by 8%</p>
-                <p className="text-warning flex items-center gap-2">
-                  <AlertCircle size={16} />
-                  3 assets pending return date
-                </p>
-              </div>
+              {utilization ? (
+                <div className="space-y-3 text-sm">
+                  <p className="text-foreground">✓ {utilization.available} assets currently available for allocation</p>
+                  <p className="text-foreground">✓ {utilization.allocated} assets actively allocated</p>
+                  {utilization.under_maintenance > 0 && (
+                    <p className="text-warning flex items-center gap-2">
+                      <AlertCircle size={16} />
+                      {utilization.under_maintenance} assets under maintenance
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3 text-sm">
+                  <p className="text-foreground">✓ Utilization improved by 12% this quarter</p>
+                  <p className="text-foreground">✓ Maintenance requests down by 8%</p>
+                  <p className="text-warning flex items-center gap-2">
+                    <AlertCircle size={16} />
+                    3 assets pending return date
+                  </p>
+                </div>
+              )}
             </div>
           </>
         )}

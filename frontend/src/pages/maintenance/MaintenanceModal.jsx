@@ -1,20 +1,17 @@
 import React from 'react'
 import { X } from 'lucide-react'
 import { useForm } from '../../hooks/useForm'
-import { useData } from '../../context/DataContext'
 
-export default function MaintenanceModal({ onClose, onSubmit }) {
-  const { assets } = useData()
-
+export default function MaintenanceModal({ onClose, onSubmit, assets }) {
   const { values, errors, touched, isSubmitting, handleChange, handleBlur, handleSubmit, setFieldError } = useForm(
     {
-      asset: assets[0]?.id || '',
+      asset_id: assets[0]?.id || '',
       description: '',
-      priority: 'Medium'
+      priority: 'medium'
     },
     async (formValues) => {
-      if (!formValues.asset) {
-        setFieldError('asset', 'Please select an asset')
+      if (!formValues.asset_id) {
+        setFieldError('asset_id', 'Please select an asset')
         return
       }
       if (!formValues.description.trim()) {
@@ -22,12 +19,10 @@ export default function MaintenanceModal({ onClose, onSubmit }) {
         return
       }
 
-      const asset = assets.find(a => a.id === formValues.asset)
-      onSubmit({
-        asset: asset?.name || formValues.asset,
+      await onSubmit({
+        asset_id: formValues.asset_id,
         description: formValues.description,
-        priority: formValues.priority,
-        status: 'Pending'
+        priority: formValues.priority
       })
     }
   )
@@ -58,20 +53,21 @@ export default function MaintenanceModal({ onClose, onSubmit }) {
           <div>
             <label className="label-base">Asset *</label>
             <select
-              name="asset"
-              value={values.asset}
+              name="asset_id"
+              value={values.asset_id}
               onChange={handleChange}
               onBlur={handleBlur}
               className="input-base"
             >
+              <option value="">Select an asset</option>
               {assets.map(asset => (
                 <option key={asset.id} value={asset.id}>
-                  {asset.name} ({asset.id})
+                  {asset.name} ({asset.asset_tag})
                 </option>
               ))}
             </select>
-            {touched.asset && errors.asset && (
-              <p className="text-danger text-sm mt-1">{errors.asset}</p>
+            {touched.asset_id && errors.asset_id && (
+              <p className="text-danger text-sm mt-1">{errors.asset_id}</p>
             )}
           </div>
 
@@ -85,10 +81,10 @@ export default function MaintenanceModal({ onClose, onSubmit }) {
               onBlur={handleBlur}
               className="input-base"
             >
-              <option value="Low">Low</option>
-              <option value="Medium">Medium</option>
-              <option value="High">High</option>
-              <option value="Critical">Critical</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
             </select>
           </div>
 

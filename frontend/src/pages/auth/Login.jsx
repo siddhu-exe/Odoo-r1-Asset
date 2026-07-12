@@ -1,7 +1,8 @@
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 
 import { toast } from 'sonner'
-import { Mail, Lock, Loader } from 'lucide-react'
+import { Mail, Lock, Loader, Eye, EyeOff } from 'lucide-react'
 
 import { useAuth } from '../../context/AuthContext'
 import { useForm } from '../../hooks/useForm'
@@ -10,6 +11,7 @@ import { validateEmail } from '../../utils/helpers'
 export default function Login() {
   const navigate = useNavigate()
   const { login, isLoading } = useAuth()
+  const [showPassword, setShowPassword] = useState(false)
 
   const { values, errors, touched, isSubmitting, handleChange, handleBlur, handleSubmit, setFieldError } = useForm(
     { email: '', password: '' },
