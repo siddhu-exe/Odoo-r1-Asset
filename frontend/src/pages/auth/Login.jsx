@@ -3,12 +3,13 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useForm } from '../../hooks/useForm'
 import { validateEmail } from '../../utils/helpers'
-import { Mail, Lock, Github, Chrome, Loader } from 'lucide-react'
+import { Mail, Lock, Github, Chrome, Loader, Eye, EyeOff } from 'lucide-react'
 import { toast } from 'sonner'
 
 export default function Login() {
   const navigate = useNavigate()
   const { login, oauthLogin, isLoading } = useAuth()
+  const [showPassword, setShowPassword] = useState(false)
 
   const { values, errors, touched, isSubmitting, handleChange, handleBlur, handleSubmit, setFieldError } = useForm(
     { email: '', password: '' },
@@ -59,10 +60,12 @@ export default function Login() {
       <div className="relative w-full max-w-md z-10">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl mb-4 shadow-lg shadow-primary/30">
-            <span className="text-2xl font-bold text-background">AF</span>
-          </div>
-          <h1 className="text-4xl font-bold text-foreground mb-2 text-gradient">AssetFlow</h1>
+          <img
+            src="/WhatsApp Image 2026-07-12 at 2.28.52 PM.jpeg"
+            alt="AssetOps Logo"
+            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 shadow-lg shadow-primary/30 object-cover"
+          />
+          <h1 className="text-4xl font-bold text-foreground mb-2 text-gradient">AssetOps</h1>
           <p className="text-text-secondary">Enterprise Asset Management</p>
         </div>
 
@@ -97,15 +100,22 @@ export default function Login() {
             <div className="relative">
               <Lock className="absolute left-3 top-3.5 text-text-secondary" size={20} />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 name="password"
                 placeholder="••••••••"
                 value={values.password}
                 onChange={handleChange}
                 onBlur={handleBlur}
                 onKeyPress={handleKeyPress}
-                className="input-base pl-10"
+                className="input-base pl-10 pr-10"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3.5 text-text-secondary hover:text-foreground transition-colors"
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
             </div>
             {touched.password && errors.password && (
               <p className="text-danger text-sm mt-1">{errors.password}</p>

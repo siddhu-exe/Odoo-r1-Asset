@@ -67,10 +67,12 @@ export default function Signup() {
       <div className="relative w-full max-w-md z-10">
         {/* Header */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl mb-4 shadow-lg shadow-primary/30">
-            <span className="text-2xl font-bold text-background">AF</span>
-          </div>
-          <h1 className="text-4xl font-bold text-foreground mb-2 text-gradient">AssetFlow</h1>
+          <img
+            src="/WhatsApp Image 2026-07-12 at 2.28.52 PM.jpeg"
+            alt="AssetOps Logo"
+            className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 shadow-lg shadow-primary/30 object-cover"
+          />
+          <h1 className="text-4xl font-bold text-foreground mb-2 text-gradient">AssetOps</h1>
           <p className="text-text-secondary">Join our platform</p>
         </div>
 

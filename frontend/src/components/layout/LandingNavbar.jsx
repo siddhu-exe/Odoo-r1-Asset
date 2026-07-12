@@ -46,7 +46,7 @@ export default function LandingNavbar() {
             exit={{ opacity: 0, height: 0 }}
             className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-accent via-chart-4 to-primary text-white text-xs font-semibold flex items-center justify-center px-4 overflow-hidden border-b border-white/10"
           >
-            <span>✨ Introducing AssetFlow 2.0: Now with interactive 3D graphs & hardware tracking!</span>
+            <span>✨ Introducing AssetOps 2.0: Now with interactive 3D graphs & hardware tracking!</span>
             <button 
               onClick={() => setShowBanner(false)}
               className="absolute right-4 hover:scale-110 transition-transform p-1 rounded-full hover:bg-white/10"
@@ -69,10 +69,12 @@ export default function LandingNavbar() {
 
             {/* Logo */}
             <Link to="/" className="flex items-center gap-3 group">
-              <div className="w-9 h-9 bg-gradient-to-br from-accent to-primary rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-accent/20 group-hover:shadow-primary/40 transition-all duration-300">
-                AF
-              </div>
-              <span className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">AssetFlow</span>
+              <img
+                src="/WhatsApp Image 2026-07-12 at 2.28.52 PM.jpeg"
+                alt="AssetOps Logo"
+                className="w-9 h-9 rounded-lg object-cover"
+              />
+              <span className="font-bold text-lg text-foreground group-hover:text-primary transition-colors">AssetOps</span>
             </Link>
 
             {/* Navigation links (Mega menu triggers) */}
@@ -136,9 +138,9 @@ export default function LandingNavbar() {
             <div className="flex items-center gap-4">
               <Link
                 to={isAuthenticated ? '/dashboard' : '/login'}
-                className="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-bold text-white rounded-lg group bg-gradient-to-br from-accent to-primary group-hover:from-accent group-hover:to-primary hover:text-white focus:ring-2 focus:outline-none focus:ring-accent/30"
+                className="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-bold rounded-lg group bg-gradient-to-br from-accent to-primary group-hover:from-accent group-hover:to-primary focus:ring-2 focus:outline-none focus:ring-accent/30"
               >
-                <span className="relative px-5 py-2 transition-all ease-in duration-75 bg-background rounded-md group-hover:bg-opacity-0 flex items-center gap-1.5">
+                <span className="relative px-5 py-2 transition-all ease-in duration-75 bg-background rounded-md group-hover:bg-opacity-0 flex items-center gap-1.5 text-foreground group-hover:text-white transition-colors">
                   {isAuthenticated ? 'Enter Dashboard' : 'Launch App'}
                   <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </span>
