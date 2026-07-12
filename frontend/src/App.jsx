@@ -37,6 +37,27 @@ function ProtectedRoute({ children }) {
   return isAuthenticated ? children : <Navigate to="/login" replace />
 }
 
+// Admin Route Component
+function AdminRoute({ children }) {
+  const { user, isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-text-secondary">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+  
+  const isAdmin = user?.email === 'admin@assetflow.com' || user?.role === 'admin'
+  return isAdmin ? children : <Navigate to="/dashboard" replace />
+}
+
 // Main App Component
 function AppContent() {
   const { isAuthenticated } = useAuth()
@@ -55,7 +76,7 @@ function AppContent() {
       <Route path="/bookings" element={<ProtectedRoute><Bookings /></ProtectedRoute>} />
       <Route path="/maintenance" element={<ProtectedRoute><Maintenance /></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
-      <Route path="/organization" element={<ProtectedRoute><Organization /></ProtectedRoute>} />
+      <Route path="/organization" element={<AdminRoute><Organization /></AdminRoute>} />
       <Route path="/audit" element={<ProtectedRoute><Audit /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
       <Route path="/allocation" element={<ProtectedRoute><Allocation /></ProtectedRoute>} />

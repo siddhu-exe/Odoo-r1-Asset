@@ -35,6 +35,8 @@ export default function Navbar() {
     return location.pathname === path
   }
 
+  const isAdmin = user?.email === 'admin@assetflow.com' || user?.role === 'admin'
+
   const menuSections = {
     assets: {
       label: 'Assets & Logistics',
@@ -51,19 +53,21 @@ export default function Navbar() {
         { label: 'Compliance Audits', path: '/audit', icon: FileText }
       ]
     },
-    orgSetup: {
-      label: 'Organization Setup',
-      links: [
-        { label: 'Departments', path: '/organization?tab=departments', icon: Building2 },
-        { label: 'Asset Categories', path: '/organization?tab=categories', icon: Tags },
-        { label: 'Employees', path: '/organization?tab=employees', icon: Users }
-      ]
-    },
+    ...(isAdmin ? {
+      orgSetup: {
+        label: 'Organization Setup',
+        links: [
+          { label: 'Departments', path: '/organization?tab=departments', icon: Building2 },
+          { label: 'Asset Categories', path: '/organization?tab=categories', icon: Tags },
+          { label: 'Employees', path: '/organization?tab=employees', icon: Users }
+        ]
+      }
+    } : {}),
     admin: {
       label: 'Management',
       links: [
         { label: 'Reports & Stats', path: '/reports', icon: BarChart3 },
-        { label: 'Organization Settings', path: '/organization', icon: Settings }
+        ...(isAdmin ? [{ label: 'Organization Settings', path: '/organization', icon: Settings }] : [])
       ]
     }
   }
