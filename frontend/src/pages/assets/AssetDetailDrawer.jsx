@@ -70,7 +70,7 @@ export default function AssetDetailDrawer({ asset, onClose, onEdit }) {
               </div>
               <div className="bg-bg-tertiary rounded-lg p-3">
                 <p className="text-xs text-text-secondary mb-1">Bookable</p>
-                <span className={`text-sm ${asset.is_bookable ? 'text-blue-400' : 'text-text-secondary'}`}>
+                <span className={`text-sm ${asset.is_bookable ? 'text-chart-4' : 'text-text-secondary'}`}>
                   {asset.is_bookable ? 'Yes' : 'No'}
                 </span>
               </div>

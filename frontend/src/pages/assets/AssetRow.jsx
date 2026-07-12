@@ -1,6 +1,8 @@
-import { getStatusColor, formatStatus, formatCurrency, formatDate } from '../../utils/helpers'
+import { getStatusColor, formatStatus, formatCurrency, formatDate, getAvatarColor } from '../../utils/helpers'
 
 export default function AssetRow({ asset, index, onViewDetails, onEdit }) {
+  const avatarColor = getAvatarColor(asset.name)
+
   return (
     <tr
       onClick={onViewDetails}
@@ -10,8 +12,8 @@ export default function AssetRow({ asset, index, onViewDetails, onEdit }) {
 
       <td className="py-3 px-3 align-middle">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-11 h-11 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-primary font-bold text-sm">
+          <div className={`w-11 h-11 ${avatarColor.bg} rounded-lg flex items-center justify-center flex-shrink-0`}>
+            <span className={`${avatarColor.text} font-bold text-sm`}>
               {asset.category_name ? asset.category_name[0].toUpperCase() : 'A'}
             </span>
           </div>
@@ -37,7 +39,7 @@ export default function AssetRow({ asset, index, onViewDetails, onEdit }) {
             {asset.condition}
           </span>
           {asset.is_bookable && (
-            <span className="text-xs px-2 py-1 rounded bg-blue-500/10 text-blue-400 border border-blue-500/30">
+            <span className="text-xs px-2 py-1 rounded bg-chart-4/10 text-chart-4 border border-chart-4/30">
               Bookable
             </span>
           )}

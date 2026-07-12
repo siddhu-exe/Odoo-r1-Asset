@@ -9,7 +9,7 @@ import { useAuth } from '../../context/AuthContext'
 const ITEM_ACTIONS = [
   { key: 'verified', label: 'Verified', cls: 'bg-success/10 hover:bg-success/20 text-success' },
   { key: 'missing', label: 'Missing', cls: 'bg-danger/10 hover:bg-danger/20 text-danger' },
-  { key: 'damaged', label: 'Damaged', cls: 'bg-warning/10 hover:bg-warning/20 text-warning' },
+  { key: 'damaged', label: 'Damaged', cls: 'bg-chart-6/10 hover:bg-chart-6/20 text-chart-6' },
 ]
 
 export default function Audit() {
@@ -242,7 +242,9 @@ export default function Audit() {
         </div>
       ) : auditCycles.length === 0 ? (
         <div className="card text-center py-12">
-          <FileText size={48} className="mx-auto text-text-secondary/30 mb-4" />
+          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-chart-4/10 flex items-center justify-center">
+            <FileText size={24} className="text-chart-4" />
+          </div>
           <p className="text-text-secondary">No audit cycles yet. {isAdmin ? 'Start one with the button above.' : 'Contact your admin to start an audit.'}</p>
         </div>
       ) : (
@@ -315,6 +317,7 @@ export default function Audit() {
                                 </tr>
                               </thead>
                               <tbody>
+<<<<<<< Updated upstream
                                 {items.map(item => {
                                   const asset = assets[item.asset_id]
                                   let pillClass = 'border-border-color text-text-secondary bg-transparent'
@@ -354,6 +357,23 @@ export default function Audit() {
                                     </tr>
                                   )
                                 })}
+=======
+                                <tr>
+                                  <td className="py-2 font-bold text-foreground">{report.total_assets}</td>
+                                  <td className="py-2">
+                                    <span className="text-xs px-2 py-0.5 rounded-full bg-success/10 text-success border border-success/30">{report.verified}</span>
+                                  </td>
+                                  <td className="py-2">
+                                    <span className="text-xs px-2 py-0.5 rounded-full bg-warning/10 text-warning border border-warning/30">{report.pending}</span>
+                                  </td>
+                                  <td className="py-2">
+                                    <span className="text-xs px-2 py-0.5 rounded-full bg-danger/10 text-danger border border-danger/30">{report.missing}</span>
+                                  </td>
+                                  <td className="py-2">
+                                    <span className="text-xs px-2 py-0.5 rounded-full bg-chart-6/10 text-chart-6 border border-chart-6/30">{report.damaged}</span>
+                                  </td>
+                                </tr>
+>>>>>>> Stashed changes
                               </tbody>
                             </table>
                           </div>

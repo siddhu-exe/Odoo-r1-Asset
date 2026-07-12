@@ -170,7 +170,9 @@ export default function Assets() {
         </div>
       ) : assets.length === 0 ? (
         <div className="card text-center py-16">
-          <Package size={48} className="mx-auto text-text-secondary mb-4 opacity-50" />
+          <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+            <Package size={24} className="text-primary" />
+          </div>
           <p className="text-text-secondary text-lg">No assets found</p>
           <p className="text-text-secondary text-sm mt-1">Try adjusting your filters or register a new asset</p>
         </div>

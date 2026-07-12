@@ -22,6 +22,13 @@ const ROLE_LABELS = {
   employee: 'Employee',
 }
 
+const ROLE_COLORS = {
+  admin: 'bg-danger/10 text-danger border border-danger/30',
+  asset_manager: 'bg-chart-4/10 text-chart-4 border border-chart-4/30',
+  department_head: 'bg-chart-5/10 text-chart-5 border border-chart-5/30',
+  employee: 'bg-text-secondary/10 text-text-secondary border border-text-secondary/30',
+}
+
 export default function Organization() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -264,7 +271,7 @@ export default function Organization() {
                   {dept && <p className="text-sm text-text-secondary">{dept.name}</p>}
                 </div>
                 <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/30">
+                  <span className={`text-xs px-2.5 py-1 rounded-full ${ROLE_COLORS[emp.role] || ROLE_COLORS.employee}`}>
                     {ROLE_LABELS[emp.role] || emp.role}
                   </span>
                   <span className={`text-xs px-2.5 py-1 rounded-full ${getStatusColor(emp.status)}`}>{formatStatus(emp.status)}</span>

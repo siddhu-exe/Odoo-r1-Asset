@@ -69,7 +69,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border-color">
+    <nav className="fixed top-4 sm:top-5 left-4 right-4 sm:left-6 sm:right-6 z-50 bg-background/80 backdrop-blur-xl border border-border-color rounded-full shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14">
 

@@ -253,7 +253,7 @@ export default function Allocation() {
                           setReturnModal(allocation)
                           setReturnForm({ condition_on_return: 'good', return_notes: '' })
                         }}
-                        className="px-3 py-1.5 bg-success/10 hover:bg-success/20 text-success rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
+                        className="px-3 py-1.5 bg-success/10 hover:bg-success/20 text-success border border-success/30 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
                       >
                         <RotateCcw size={14} />
                         Return
@@ -261,7 +261,7 @@ export default function Allocation() {
                     )}
                     <button
                       onClick={() => setShowTransferModal(true)}
-                      className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
+                      className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
                     >
                       <ArrowRight size={14} />
                       Transfer
@@ -310,7 +310,7 @@ export default function Allocation() {
                         <button
                           disabled={actionLoading[transfer.id + '_ap']}
                           onClick={() => handleApproveTransfer(transfer)}
-                          className="p-1.5 bg-success/10 hover:bg-success/20 text-success rounded-lg transition-colors"
+                          className="p-1.5 bg-success/10 hover:bg-success/20 text-success border border-success/30 rounded-lg transition-colors"
                           title="Approve transfer"
                         >
                           {actionLoading[transfer.id + '_ap'] ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
@@ -318,7 +318,7 @@ export default function Allocation() {
                         <button
                           disabled={actionLoading[transfer.id + '_rej']}
                           onClick={() => handleRejectTransfer(transfer)}
-                          className="p-1.5 bg-danger/10 hover:bg-danger/20 text-danger rounded-lg transition-colors"
+                          className="p-1.5 bg-danger/10 hover:bg-danger/20 text-danger border border-danger/30 rounded-lg transition-colors"
                           title="Reject transfer"
                         >
                           {actionLoading[transfer.id + '_rej'] ? <Loader2 size={14} className="animate-spin" /> : <X size={14} />}

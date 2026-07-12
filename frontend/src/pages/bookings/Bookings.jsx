@@ -165,7 +165,9 @@ export default function Bookings() {
           })
         ) : (
           <div className="card text-center py-12">
-            <Calendar size={48} className="text-text-secondary/30 mx-auto mb-4" />
+            <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-chart-4/10 flex items-center justify-center">
+              <Calendar size={24} className="text-chart-4" />
+            </div>
             <p className="text-text-secondary">No bookings found</p>
           </div>
         )}

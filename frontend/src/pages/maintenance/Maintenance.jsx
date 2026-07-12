@@ -1,18 +1,18 @@
 import React, { useState, useCallback, useEffect } from 'react'
 import MainLayout from '../../components/layout/MainLayout'
 import { Wrench, Plus, GripVertical, Loader2, Check, X, UserCog, Play, ClipboardCheck } from 'lucide-react'
-import { formatStatus } from '../../utils/helpers'
+import { formatStatus, getPriorityColor } from '../../utils/helpers'
 import { toast } from 'sonner'
 import MaintenanceModal from './MaintenanceModal'
 import api from '../../api'
 import { useAuth } from '../../context/AuthContext'
 
 const COLUMNS = [
-  { key: 'pending', label: 'Pending' },
-  { key: 'approved', label: 'Approved' },
-  { key: 'assigned', label: 'Technician Assigned' },
-  { key: 'in_progress', label: 'In Progress' },
-  { key: 'resolved', label: 'Resolved' },
+  { key: 'pending', label: 'Pending', tint: 'bg-chart-2/20 text-chart-2' },
+  { key: 'approved', label: 'Approved', tint: 'bg-success/20 text-success' },
+  { key: 'assigned', label: 'Technician Assigned', tint: 'bg-chart-4/20 text-chart-4' },
+  { key: 'in_progress', label: 'In Progress', tint: 'bg-chart-5/20 text-chart-5' },
+  { key: 'resolved', label: 'Resolved', tint: 'bg-success/20 text-success' },
 ]
 
 export default function Maintenance() {
@@ -164,7 +164,7 @@ export default function Maintenance() {
           {COLUMNS.map(col => (
             <div key={col.key} className="bg-bg-secondary/30 rounded-xl p-4 border border-border-color min-h-[400px]">
               <h3 className="font-semibold text-foreground mb-4 text-sm flex items-center gap-2">
-                <span className="w-5 h-5 bg-primary/20 text-primary text-xs rounded flex items-center justify-center font-bold">
+                <span className={`w-5 h-5 text-xs rounded flex items-center justify-center font-bold ${col.tint}`}>
                   {getItemsByStatus(col.key).length}
                 </span>
                 {col.label}
@@ -186,11 +186,7 @@ export default function Maintenance() {
                         </div>
                       </div>
                       <div className="mb-2">
-                        <span className={`text-xs px-2 py-0.5 rounded ${
-                          item.priority === 'critical' ? 'bg-danger/10 text-danger' :
-                          item.priority === 'high' ? 'bg-warning/10 text-warning' :
-                          'bg-primary/10 text-primary'
-                        }`}>
+                        <span className={`text-xs px-2 py-0.5 rounded ${getPriorityColor(item.priority)}`}>
                           {formatStatus(item.priority)}
                         </span>
                       </div>
@@ -253,7 +249,9 @@ export default function Maintenance() {
                 })}
                 {getItemsByStatus(col.key).length === 0 && (
                   <div className="text-center py-8 text-text-secondary/40">
-                    <Wrench size={22} className="mx-auto mb-2" />
+                    <div className={`w-9 h-9 mx-auto mb-2 rounded-full flex items-center justify-center ${col.tint}`}>
+                      <Wrench size={16} />
+                    </div>
                     <p className="text-xs">No items</p>
                   </div>
                 )}
