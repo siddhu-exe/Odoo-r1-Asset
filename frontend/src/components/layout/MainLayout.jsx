@@ -20,8 +20,8 @@ export default function MainLayout({ children }) {
       {/* Noise overlay for premium grain feel */}
       <div className="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none -z-20" />
 
-      {!isDashboard && <Navbar />}
-      <main className={`${isDashboard ? 'pt-0' : 'pt-14'} relative z-10 overflow-auto`}>
+      <Navbar />
+      <main className="pt-14 relative z-10 overflow-auto">
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
           {children}
         </div>
