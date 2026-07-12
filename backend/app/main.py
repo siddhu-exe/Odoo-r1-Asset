@@ -6,11 +6,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import api_router
 from app.core.config import settings
+from app.core.database import AsyncSessionLocal
+from app.core.seed import seed_admin
 from app.shared.middleware import RequestContextMiddleware
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    async with AsyncSessionLocal() as session:
+        await seed_admin(session)
     yield
 
 
