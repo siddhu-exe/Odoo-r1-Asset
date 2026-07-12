@@ -1,42 +1,118 @@
-import React, { useState } from 'react'
-import { useData } from '../../context/DataContext'
-import MainLayout from '../../components/layout/MainLayout'
-import { Search, Filter, Plus, ChevronRight, Edit2 } from 'lucide-react'
-import { getStatusColor, formatCurrency, formatDate } from '../../utils/helpers'
+import { useState, useEffect, useCallback, useRef } from 'react'
+
 import { toast } from 'sonner'
+import { Search, Plus, Loader2, Package } from 'lucide-react'
+
+import api from '../../api'
+import MainLayout from '../../components/layout/MainLayout'
 import AssetModal from './AssetModal'
+import AssetDetailDrawer from './AssetDetailDrawer'
+import AssetRow from './AssetRow'
+
+const ASSET_STATUSES = [
+  { value: '', label: 'All Statuses' },
+  { value: 'available', label: 'Available' },
+  { value: 'allocated', label: 'Allocated' },
+  { value: 'reserved', label: 'Reserved' },
+  { value: 'under_maintenance', label: 'Under Maintenance' },
+  { value: 'lost', label: 'Lost' },
+  { value: 'retired', label: 'Retired' },
+  { value: 'disposed', label: 'Disposed' },
+]
 
 export default function Assets() {
-  const { assets, addAsset, mockCategories } = useData()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState('All')
-  const [filterCategory, setFilterCategory] = useState('All')
+  const [assets, setAssets] = useState([])
+  const [categories, setCategories] = useState([])
+  const [total, setTotal] = useState(0)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [loading, setLoading] = useState(true)
+
+  const [searchInput, setSearchInput] = useState('')
+  const [filterStatus, setFilterStatus] = useState('')
+  const [filterCategoryId, setFilterCategoryId] = useState('')
+
   const [showModal, setShowModal] = useState(false)
   const [selectedAsset, setSelectedAsset] = useState(null)
+  const [editingAsset, setEditingAsset] = useState(null)
 
-  const filteredAssets = assets.filter(asset => {
-    const matchSearch = asset.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      asset.id.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchStatus = filterStatus === 'All' || asset.status === filterStatus
-    const matchCategory = filterCategory === 'All' || asset.category === filterCategory
-    return matchSearch && matchStatus && matchCategory
-  })
+  const searchTimeout = useRef(null)
+  const [debouncedSearch, setDebouncedSearch] = useState('')
 
-  const handleAddAsset = (assetData) => {
-    addAsset(assetData)
-    toast.success(`Asset "${assetData.name}" registered successfully!`)
-    setShowModal(false)
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await api.get('/categories?page_size=100')
+      setCategories(res.data.items)
+    } catch {
+      // categories are optional for filtering
+    }
+  }, [])
+
+  const fetchAssets = useCallback(async (currentPage, search, status, categoryId) => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams({ page: currentPage, page_size: 20 })
+      if (search) params.append('search', search)
+      if (status) params.append('status', status)
+      if (categoryId) params.append('category_id', categoryId)
+
+      const res = await api.get(`/assets?${params}`)
+      setAssets(res.data.items)
+      setTotal(res.data.total)
+      setTotalPages(res.data.total_pages)
+    } catch (err) {
+      toast.error('Failed to load assets')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchCategories()
+  }, [fetchCategories])
+
+  useEffect(() => {
+    fetchAssets(page, debouncedSearch, filterStatus, filterCategoryId)
+  }, [fetchAssets, page, debouncedSearch, filterStatus, filterCategoryId])
+
+  const handleSearchChange = (value) => {
+    setSearchInput(value)
+    clearTimeout(searchTimeout.current)
+    searchTimeout.current = setTimeout(() => {
+      setDebouncedSearch(value)
+      setPage(1)
+    }, 400)
   }
 
-  const statuses = ['All', 'Available', 'Allocated', 'Maintenance', 'Damaged']
+  const handleStatusChange = (value) => {
+    setFilterStatus(value)
+    setPage(1)
+  }
+
+  const handleCategoryChange = (value) => {
+    setFilterCategoryId(value)
+    setPage(1)
+  }
+
+  const handleAssetCreated = () => {
+    setShowModal(false)
+    setPage(1)
+    fetchAssets(1, debouncedSearch, filterStatus, filterCategoryId)
+    toast.success('Asset registered successfully')
+  }
+
+  const handleAssetUpdated = () => {
+    setEditingAsset(null)
+    fetchAssets(page, debouncedSearch, filterStatus, filterCategoryId)
+    toast.success('Asset updated successfully')
+  }
 
   return (
     <MainLayout>
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Assets Directory</h1>
-          <p className="text-text-secondary mt-1">Manage and track all organizational assets</p>
+          <p className="text-text-secondary mt-1">Register and track all organizational assets</p>
         </div>
         <button
           onClick={() => setShowModal(true)}
@@ -47,118 +123,117 @@ export default function Assets() {
         </button>
       </div>
 
-      {/* Search and Filters */}
       <div className="card mb-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search */}
-          <div className="md:col-span-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-3.5 text-text-secondary" size={20} />
-              <input
-                type="text"
-                placeholder="Search by name or ID..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="input-base pl-10"
-              />
-            </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-3.5 text-text-secondary" size={18} />
+            <input
+              type="text"
+              placeholder="Search by name, tag, serial, location…"
+              value={searchInput}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="input-base pl-10"
+            />
           </div>
 
-          {/* Status Filter */}
-          <div>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="input-base"
-            >
-              {statuses.map(status => (
-                <option key={status} value={status}>{status}</option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={filterStatus}
+            onChange={(e) => handleStatusChange(e.target.value)}
+            className="input-base"
+          >
+            {ASSET_STATUSES.map(s => (
+              <option key={s.value} value={s.value}>{s.label}</option>
+            ))}
+          </select>
 
-          {/* Category Filter */}
-          <div>
-            <select
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              className="input-base"
-            >
-              <option value="All">All Categories</option>
-              {mockCategories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
+          <select
+            value={filterCategoryId}
+            onChange={(e) => handleCategoryChange(e.target.value)}
+            className="input-base"
+          >
+            <option value="">All Categories</option>
+            {categories.map(cat => (
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* Results Counter */}
       <div className="text-sm text-text-secondary mb-4">
-        Showing <span className="text-foreground font-semibold">{filteredAssets.length}</span> of {assets.length} assets
+        Showing <span className="text-foreground font-semibold">{assets.length}</span> of{' '}
+        <span className="text-foreground font-semibold">{total}</span> assets
       </div>
 
-      {/* Assets Grid */}
-      <div className="grid gap-4">
-        {filteredAssets.length > 0 ? (
-          filteredAssets.map(asset => (
-            <div
+      {loading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 size={32} className="animate-spin text-primary" />
+        </div>
+      ) : assets.length === 0 ? (
+        <div className="card text-center py-16">
+          <Package size={48} className="mx-auto text-text-secondary mb-4 opacity-50" />
+          <p className="text-text-secondary text-lg">No assets found</p>
+          <p className="text-text-secondary text-sm mt-1">Try adjusting your filters or register a new asset</p>
+        </div>
+      ) : (
+        <div className="grid gap-3">
+          {assets.map(asset => (
+            <AssetRow
               key={asset.id}
-              className="card flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 cursor-pointer hover:border-primary/50"
-            >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start gap-3">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-primary font-semibold text-sm">
-                      {asset.category[0]}
-                    </span>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-foreground truncate">{asset.name}</h3>
-                    <p className="text-sm text-text-secondary">ID: {asset.id}</p>
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <span className="text-xs bg-bg-tertiary px-2 py-1 rounded">{asset.category}</span>
-                      <span className={`text-xs px-2 py-1 rounded ${getStatusColor(asset.status)}`}>
-                        {asset.status}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              asset={asset}
+              onViewDetails={() => setSelectedAsset(asset)}
+              onEdit={() => setEditingAsset(asset)}
+            />
+          ))}
+        </div>
+      )}
 
-              <div className="grid grid-cols-2 sm:flex sm:gap-6 text-sm">
-                <div>
-                  <p className="text-text-secondary text-xs">Location</p>
-                  <p className="text-foreground font-semibold">{asset.location}</p>
-                </div>
-                <div>
-                  <p className="text-text-secondary text-xs">Allocated To</p>
-                  <p className="text-foreground font-semibold">{asset.allocatedTo || '-'}</p>
-                </div>
-                <div>
-                  <p className="text-text-secondary text-xs">Value</p>
-                  <p className="text-foreground font-semibold">{formatCurrency(asset.value)}</p>
-                </div>
-              </div>
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-3 mt-6">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="btn-secondary px-4 py-2 text-sm disabled:opacity-40"
+          >
+            Previous
+          </button>
+          <span className="text-text-secondary text-sm">
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="btn-secondary px-4 py-2 text-sm disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
+      )}
 
-              <button className="p-2 hover:bg-bg-tertiary rounded-lg transition-colors">
-                <ChevronRight size={20} className="text-text-secondary hover:text-primary" />
-              </button>
-            </div>
-          ))
-        ) : (
-          <div className="card text-center py-12">
-            <p className="text-text-secondary">No assets found matching your filters</p>
-          </div>
-        )}
-      </div>
-
-      {/* Modal */}
       {showModal && (
         <AssetModal
+          categories={categories}
           onClose={() => setShowModal(false)}
-          onSubmit={handleAddAsset}
-          categories={mockCategories}
+          onSuccess={handleAssetCreated}
+        />
+      )}
+
+      {editingAsset && (
+        <AssetModal
+          categories={categories}
+          asset={editingAsset}
+          onClose={() => setEditingAsset(null)}
+          onSuccess={handleAssetUpdated}
+        />
+      )}
+
+      {selectedAsset && (
+        <AssetDetailDrawer
+          asset={selectedAsset}
+          onClose={() => setSelectedAsset(null)}
+          onEdit={() => {
+            setEditingAsset(selectedAsset)
+            setSelectedAsset(null)
+          }}
         />
       )}
     </MainLayout>
