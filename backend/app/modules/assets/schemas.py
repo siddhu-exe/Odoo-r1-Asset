@@ -2,7 +2,7 @@ import uuid
 from datetime import date, datetime
 from decimal import Decimal
 
-from app.core.enums import AssetCondition, AssetStatus
+from app.core.enums import AllocationStatus, AssetCondition, AssetStatus, MaintenanceStatus
 from app.shared.base_schema import BaseSchema
 
 
@@ -12,6 +12,7 @@ class AssetResponse(BaseSchema):
     asset_tag: str
     serial_number: str | None
     category_id: uuid.UUID
+    category_name: str | None
     condition: AssetCondition
     status: AssetStatus
     location: str | None
@@ -49,6 +50,21 @@ class UpdateAssetRequest(BaseSchema):
     document_url: str | None = None
 
 
+class AllocationHistoryEntry(BaseSchema):
+    id: uuid.UUID
+    status: AllocationStatus
+    allocated_at: datetime
+    returned_at: datetime | None
+
+
+class MaintenanceHistoryEntry(BaseSchema):
+    id: uuid.UUID
+    status: MaintenanceStatus
+    priority: str
+    description: str | None
+    raised_at: datetime
+
+
 class AssetHistoryResponse(BaseSchema):
-    allocations: list[dict]
-    maintenance_requests: list[dict]
+    allocations: list[AllocationHistoryEntry]
+    maintenance_requests: list[MaintenanceHistoryEntry]

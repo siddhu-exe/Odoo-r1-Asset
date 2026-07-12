@@ -63,3 +63,16 @@ async def update_category(
     await session.flush()
     await session.refresh(category)
     return category
+
+
+async def update_category_status(
+    category_id: uuid.UUID,
+    request: UpdateStatusRequest,
+    session: AsyncSession,
+) -> AssetCategory:
+    repository = CategoryRepository(session)
+    category = await repository.get_by_id_or_raise(category_id)
+    category.status = request.status
+    await session.flush()
+    await session.refresh(category)
+    return category

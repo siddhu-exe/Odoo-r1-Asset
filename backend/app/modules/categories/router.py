@@ -9,6 +9,7 @@ from app.modules.categories.schemas import (
     CategoryResponse,
     CreateCategoryRequest,
     UpdateCategoryRequest,
+    UpdateStatusRequest,
 )
 from app.shared.dependencies import SessionDep, require_role
 from app.shared.pagination import PageParams, PaginatedResponse
@@ -49,3 +50,13 @@ async def update_category(
     _: Annotated[None, AdminOnly],
 ) -> CategoryResponse:
     return await service.update_category(category_id, request, session)
+
+
+@router.patch("/{category_id}/status", response_model=CategoryResponse)
+async def update_category_status(
+    category_id: uuid.UUID,
+    request: UpdateStatusRequest,
+    session: SessionDep,
+    _: Annotated[None, AdminOnly],
+) -> CategoryResponse:
+    return await service.update_category_status(category_id, request, session)
