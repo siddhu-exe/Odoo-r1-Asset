@@ -3,7 +3,7 @@ from datetime import date
 from decimal import Decimal
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Date, ForeignKey, Numeric, String
+from sqlalchemy import Boolean, Date, ForeignKey, Integer, Numeric, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -47,5 +47,7 @@ class Asset(TimestampedModel):
     photo_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     document_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     notes: Mapped[str | None] = mapped_column(String(1000), nullable=True)
+    next_maintenance_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    expected_lifespan_years: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     category: Mapped["AssetCategory"] = relationship("AssetCategory")
