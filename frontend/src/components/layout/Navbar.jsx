@@ -73,17 +73,19 @@ export default function Navbar() {
           <div className="flex items-center gap-6 lg:gap-10">
             {/* Logo */}
             <Link to="/dashboard" className="flex items-center gap-3 group">
-              <div className="w-9 h-9 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-primary/20 transition-all duration-300">
-                AF
-              </div>
-              <span className="font-bold text-lg text-foreground group-hover:text-primary transition-colors hidden sm:block">AssetFlow</span>
+              <img
+                src="/WhatsApp Image 2026-07-12 at 2.28.52 PM.jpeg"
+                alt="AssetOps Logo"
+                className="w-9 h-9 rounded-lg object-cover"
+              />
+              <span className="font-bold text-lg text-foreground group-hover:text-primary transition-colors hidden sm:block">AssetOps</span>
             </Link>
 
             {/* Desktop Navigation Links */}
             <div className="hidden md:flex items-center gap-6 lg:gap-8">
               <Link
                 to="/dashboard"
-                className={`text-sm font-medium transition-colors ${isActive('/dashboard') ? 'text-primary' : 'text-text-secondary hover:text-white'}`}
+                className={`text-sm font-medium transition-colors ${isActive('/dashboard') ? 'text-primary' : 'text-text-secondary hover:text-primary'}`}
               >
                 Dashboard
               </Link>
@@ -100,7 +102,7 @@ export default function Navbar() {
                     onMouseEnter={() => setActiveDropdown(key)}
                     onMouseLeave={() => setActiveDropdown(null)}
                   >
-                    <button className={`flex items-center gap-1 text-sm font-medium transition-colors py-4 ${isSectionActive ? 'text-primary' : 'text-text-secondary hover:text-white'
+                    <button className={`flex items-center gap-1 text-sm font-medium transition-colors py-4 ${isSectionActive ? 'text-primary' : 'text-text-secondary hover:text-primary'
                       }`}>
                       {section.label}
                       <ChevronDown size={14} className={`transition-transform duration-200 ${activeDropdown === key ? 'rotate-180' : ''}`} />
@@ -120,7 +122,7 @@ export default function Navbar() {
                                 to={link.path}
                                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold transition-all ${active
                                   ? 'bg-primary/10 text-primary border border-primary/20'
-                                  : 'text-text-secondary hover:bg-white/5 hover:text-white border border-transparent'
+                                  : 'text-text-secondary hover:bg-primary/10 hover:text-primary border border-transparent'
                                   }`}
                               >
                                 <Icon size={14} className={active ? 'text-primary' : 'text-text-secondary'} />
@@ -209,7 +211,7 @@ export default function Navbar() {
                         key={link.path}
                         to={link.path}
                         onClick={() => setShowMobileMenu(false)}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold ${active ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:bg-white/5'
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-semibold ${active ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:bg-primary/10 hover:text-primary'
                           }`}
                       >
                         <Icon size={14} />

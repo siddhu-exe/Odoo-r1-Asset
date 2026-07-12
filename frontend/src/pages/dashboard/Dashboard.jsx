@@ -9,17 +9,11 @@ import {
   Wrench,
   BarChart3,
   Plus,
-  TrendingUp,
-  Activity,
-  Layers,
   ChevronRight,
-  ArrowRight,
-  Server,
-  Terminal,
-  Laptop,
-  Monitor,
   LayoutDashboard,
-  Bell
+  Bell,
+  Activity,
+  TrendingUp
 } from 'lucide-react'
 import {
   BarChart,

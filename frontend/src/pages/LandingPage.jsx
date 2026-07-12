@@ -423,7 +423,7 @@ export default function LandingPage() {
             <div className="w-2.5 h-2.5 rounded-full bg-danger/80" />
             <div className="w-2.5 h-2.5 rounded-full bg-warning/80" />
             <div className="w-2.5 h-2.5 rounded-full bg-success/80" />
-            <span className="text-[10px] text-text-secondary/40 font-mono ml-4">assetflow.enterprise/dashboard</span>
+            <span className="text-[10px] text-text-secondary/40 font-mono ml-4">assetops.enterprise/dashboard</span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -583,7 +583,7 @@ export default function LandingPage() {
       <footer id="about" className="py-12 border-t border-lux-border relative z-20 text-center text-xs text-text-secondary/50">
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-white">AssetFlow</span>
+            <span className="font-bold text-white">AssetOps</span>
             <span>© {new Date().getFullYear()} Keshav Corporation. All rights reserved.</span>
           </div>
           <div className="flex gap-6">
