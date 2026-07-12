@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useLocation, Link } from 'react-router-dom'
 import { useData } from '../../context/DataContext'
 import { useAuth } from '../../context/AuthContext'
@@ -38,33 +38,17 @@ export default function Dashboard() {
   const { assets, bookings, maintenanceItems, notifications } = useData()
   const { user } = useAuth()
   const location = useLocation()
+  const [hoveredSection, setHoveredSection] = useState('')
 
   useEffect(() => {
     document.body.classList.add('dashboard-page')
-    return () => {
-      document.body.classList.remove('dashboard-page')
-    }
+    return () => document.body.classList.remove('dashboard-page')
   }, [])
 
   const totalAssets = assets.length
   const allocatedAssets = assets.filter(a => a.status === 'Allocated').length
   const availableAssets = assets.filter(a => a.status === 'Available').length
   const maintenanceCount = maintenanceItems.filter(m => m.status === 'Pending').length
-
-  const utilizationData = [
-    { month: 'Jan', utilization: 62 },
-    { month: 'Feb', utilization: 74 },
-    { month: 'Mar', utilization: 69 },
-    { month: 'Apr', utilization: 81 },
-    { month: 'May', utilization: 88 },
-    { month: 'Jun', utilization: 85 }
-  ]
-
-  const categoryData = [
-    { name: 'IT Devices', value: assets.filter(a => a.category === 'Electronics').length || 3 },
-    { name: 'Infrastructure', value: assets.filter(a => a.category === 'Furniture').length || 2 },
-    { name: 'Licensing/Other', value: assets.filter(a => !['Electronics', 'Furniture'].includes(a.category)).length || 1 }
-  ]
 
   const barData = [
     { label: 'Mon', value: 48 },
@@ -84,16 +68,44 @@ export default function Dashboard() {
 
   const navItems = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { label: 'Assets', path: '/assets', icon: Package },
-    { label: 'Allocation & Transfer', path: '/allocation', icon: ChevronRight },
-    { label: 'Reports', path: '/reports', icon: BarChart3 },
-    { label: 'Notifications', path: '/notifications', icon: Bell }
-  ]
-
-  const eventRows = [
-    { initials: 'AS', label: 'Asset sync review', tone: '#FF5A3C' },
-    { initials: 'PR', label: 'Procurement approval', tone: '#8B7FE8' },
-    { initials: 'OP', label: 'Operations handoff', tone: '#FF5A3C' }
+    {
+      label: 'Assets & Logistics',
+      path: '/assets',
+      icon: Package,
+      sections: [
+        { label: 'Directory', path: '/assets' },
+        { label: 'Allocations & Transfers', path: '/allocation' },
+        { label: 'Resource Bookings', path: '/bookings' }
+      ]
+    },
+    {
+      label: 'Operations',
+      path: '/maintenance',
+      icon: Activity,
+      sections: [
+        { label: 'Maintenance Board', path: '/maintenance' },
+        { label: 'Compliance Audits', path: '/audit' }
+      ]
+    },
+    {
+      label: 'Organization Setup',
+      path: '/organization',
+      icon: Layers,
+      sections: [
+        { label: 'Departments', path: '/organization?tab=departments' },
+        { label: 'Asset Categories', path: '/organization?tab=categories' },
+        { label: 'Employees', path: '/organization?tab=employees' }
+      ]
+    },
+    {
+      label: 'Management',
+      path: '/reports',
+      icon: BarChart3,
+      sections: [
+        { label: 'Reports & Stats', path: '/reports' },
+        { label: 'Notifications', path: '/notifications' }
+      ]
+    }
   ]
 
   const renderTodayLabel = ({ x, y, width, payload }) => {
@@ -112,33 +124,66 @@ export default function Dashboard() {
   return (
     <MainLayout>
       <div className="min-h-full -m-4 sm:-m-6 lg:-m-8 p-4 sm:p-6 lg:p-8 bg-background relative">
-        <div className="flex flex-wrap items-center gap-2 border-b border-black/10 pb-4 mb-6 text-xs text-[#6B7280]">
-          <span className="font-mono uppercase tracking-wider text-black/35 mr-2 flex items-center gap-1.5">
-            <Activity size={12} className="text-primary" /> Active Queries:
-          </span>
-          {['Region: Global ✕', 'Category: Electronics ✕', 'Status: Active ✕', 'Level: Enterprise ✕'].map((filter, i) => (
-            <span
-              key={i}
-              className="px-2.5 py-1 rounded-full bg-white border border-black/10 text-black/70 hover:border-primary hover:text-primary transition-all cursor-pointer font-medium shadow-[0_6px_20px_rgba(17,17,17,0.04)]"
-            >
-              {filter}
-            </span>
-          ))}
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-8">
-          <div className="lg:col-span-3 flex flex-col gap-6">
+          <div className="lg:col-span-4 flex flex-col gap-6 self-start">
+            <div className="relative bg-white rounded-[24px] border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5 overflow-visible">
+              <p className="text-[11px] uppercase tracking-[0.28em] text-black/45 font-semibold mb-4">Navigation</p>
+              <div className="space-y-2 overflow-visible">
+                {navItems.map((item) => {
+                  const Icon = item.icon
+                  const active = location.pathname === item.path || (item.sections && item.sections.some(section => location.pathname === section.path.split('?')[0]))
+                  const hasChildren = Boolean(item.sections?.length)
+
+                  return (
+                    <div
+                      key={item.label}
+                      className="relative"
+                      onMouseEnter={() => hasChildren && setHoveredSection(item.label)}
+                      onMouseLeave={() => hasChildren && setHoveredSection('')}
+                    >
+                      <Link
+                        to={item.path}
+                        className={`relative flex items-center gap-3 rounded-2xl px-4 py-3 transition-colors ${active ? 'bg-[#FFF2EE] text-[#FF5A3C]' : 'text-black/65 hover:bg-black/5'}`}
+                      >
+                        {active && <span className="absolute left-0 top-2 bottom-2 w-1 rounded-full bg-[#FF5A3C]" />}
+                        <Icon size={18} className={active ? 'text-[#FF5A3C]' : 'text-black/55'} />
+                        <span className="text-sm font-medium">{item.label}</span>
+                      </Link>
+
+                      {hasChildren && hoveredSection === item.label && (
+                        <div className="absolute left-full top-0 ml-3 w-64 rounded-[24px] bg-white border border-black/5 shadow-[0_20px_40px_rgba(17,17,17,0.12)] p-3 z-20">
+                          <div className="mb-2 px-2 pt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-black/35">{item.label}</div>
+                          <div className="flex flex-col gap-1">
+                            {item.sections.map((section) => {
+                              const sectionActive = section.path.includes('?')
+                                ? location.pathname === section.path.split('?')[0] && location.search === `?${section.path.split('?')[1]}`
+                                : location.pathname === section.path
+
+                              return (
+                                <Link
+                                  key={section.path}
+                                  to={section.path}
+                                  className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-xs font-semibold transition-colors ${sectionActive ? 'bg-[#FFF2EE] text-[#FF5A3C]' : 'text-black/65 hover:bg-black/5'}`}
+                                >
+                                  {sectionActive && <span className="h-5 w-1 rounded-full bg-[#FF5A3C]" />}
+                                  <span>{section.label}</span>
+                                </Link>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
             <div className="bg-[#EFEFEF] rounded-[24px] border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5 relative overflow-hidden">
               <div className="flex items-start gap-4">
                 <div className="relative shrink-0">
-                  <img
-                    src={user?.avatar}
-                    alt={user?.name}
-                    className="w-16 h-16 rounded-full object-cover border-4 border-white"
-                  />
-                  <div className="absolute -left-1 -bottom-1 rounded-full bg-[#FF5A3C] text-white text-[10px] font-bold px-2.5 py-1 shadow-[0_8px_20px_rgba(255,90,60,0.28)]">
-                    4.9
-                  </div>
+                  <img src={user?.avatar} alt={user?.name} className="w-16 h-16 rounded-full object-cover border-4 border-white" />
+                  <div className="absolute -left-1 -bottom-1 rounded-full bg-[#FF5A3C] text-white text-[10px] font-bold px-2.5 py-1 shadow-[0_8px_20px_rgba(255,90,60,0.28)]">4.9</div>
                 </div>
                 <div className="min-w-0 pt-1">
                   <p className="text-[11px] uppercase tracking-[0.28em] text-black/45 font-semibold">Profile</p>
@@ -152,30 +197,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="bg-white rounded-[24px] border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5">
-              <p className="text-[11px] uppercase tracking-[0.28em] text-black/45 font-semibold mb-4">Navigation</p>
-              <div className="space-y-2">
-                {navItems.map((item) => {
-                  const Icon = item.icon
-                  const active = location.pathname === item.path
-
-                  return (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      className={`relative flex items-center gap-3 rounded-2xl px-4 py-3 transition-colors ${
-                        active ? 'bg-[#FFF2EE] text-[#FF5A3C]' : 'text-black/65 hover:bg-black/5'
-                      }`}
-                    >
-                      {active && <span className="absolute left-0 top-2 bottom-2 w-1 rounded-full bg-[#FF5A3C]" />}
-                      <Icon size={18} className={active ? 'text-[#FF5A3C]' : 'text-black/55'} />
-                      <span className="text-sm font-medium">{item.label}</span>
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-
             <div className="rounded-[24px] bg-[#111111] text-white shadow-[0_18px_40px_rgba(17,17,17,0.18)] p-5">
               <p className="text-[11px] uppercase tracking-[0.28em] text-white/55 font-semibold">Focus</p>
               <h3 className="mt-3 text-xl font-black leading-tight">Check the latest queue before approving transfers.</h3>
@@ -185,167 +206,129 @@ export default function Dashboard() {
               </button>
             </div>
 
-            <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5">
-              <h3 className="text-sm font-black text-black uppercase tracking-[0.24em] mb-4 flex items-center gap-2">
-                <Layers size={14} className="text-[#FF5A3C]" /> Layer Selector
-              </h3>
-              <div className="flex flex-col gap-3 text-xs">
-                {[
-                  { label: 'Hardware Registry', checked: true },
-                  { label: 'Pending Repair Nodes', checked: true },
-                  { label: 'Custody Transfer Vectors', checked: false }
-                ].map((layer, i) => (
-                  <label key={i} className="flex items-center gap-2.5 cursor-pointer text-black/65 hover:text-black transition-colors">
-                    <input
-                      type="checkbox"
-                      defaultChecked={layer.checked}
-                      className="rounded border-black/20 bg-white text-[#FF5A3C] focus:ring-[#FF5A3C]/20 w-4 h-4"
-                    />
-                    <span>{layer.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5">
-              <h3 className="text-sm font-black text-black uppercase tracking-[0.24em] mb-4 flex items-center gap-2">
-                <TrendingUp size={14} className="text-[#FF5A3C]" /> Value Threshold
-              </h3>
-              <div className="flex flex-col gap-2">
-                <input
-                  type="range"
-                  min="0"
-                  max="10000"
-                  defaultValue="4200"
-                  className="w-full h-1.5 bg-black/10 rounded-lg appearance-none cursor-pointer accent-[#FF5A3C]"
-                />
-                <div className="flex justify-between text-[10px] text-black/45 font-mono">
-                  <span>$0</span>
-                  <span>$4,200 Limit</span>
-                  <span>$10k+</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5">
+                <h3 className="text-sm font-black text-black uppercase tracking-[0.24em] mb-4 flex items-center gap-2">
+                  <Layers size={14} className="text-[#FF5A3C]" /> Layer Selector
+                </h3>
+                <div className="flex flex-col gap-3 text-xs">
+                  {[
+                    { label: 'Hardware Registry', checked: true },
+                    { label: 'Pending Repair Nodes', checked: true },
+                    { label: 'Custody Transfer Vectors', checked: false }
+                  ].map((layer, i) => (
+                    <label key={i} className="flex items-center gap-2.5 cursor-pointer text-black/65 hover:text-black transition-colors">
+                      <input type="checkbox" defaultChecked={layer.checked} className="rounded border-black/20 bg-white text-[#FF5A3C] focus:ring-[#FF5A3C]/20 w-4 h-4" />
+                      <span>{layer.label}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
-            </div>
 
-            <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5">
-              <h3 className="text-sm font-black text-black uppercase tracking-[0.24em] mb-4 flex items-center gap-2">
-                <Activity size={14} className="text-[#8B7FE8]" /> Operations Status
-              </h3>
-              <div className="flex flex-col gap-3 text-xs">
-                {[
-                  { label: 'Available stock', color: 'bg-[#FF5A3C]', checked: true },
-                  { label: 'Allocated assets', color: 'bg-[#8B7FE8]', checked: true },
-                  { label: 'In maintenance', color: 'bg-black', checked: false },
-                  { label: 'Anomalies flagged', color: 'bg-[#C9CCD3]', checked: false }
-                ].map((item, idx) => (
-                  <div key={idx} className="flex items-center justify-between text-black/65">
-                    <span className="flex items-center gap-2">
-                      <span className={`w-1.5 h-1.5 rounded-full ${item.color}`} />
-                      {item.label}
-                    </span>
-                    <input
-                      type="checkbox"
-                      defaultChecked={item.checked}
-                      className="rounded border-black/20 bg-white text-[#FF5A3C] focus:ring-[#FF5A3C]/20 w-4 h-4"
-                    />
-                  </div>
-                ))}
+              <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5">
+                <h3 className="text-sm font-black text-black uppercase tracking-[0.24em] mb-4 flex items-center gap-2">
+                  <TrendingUp size={14} className="text-[#FF5A3C]" /> Value Threshold
+                </h3>
+                <div className="flex flex-col gap-2">
+                  <input type="range" min="0" max="10000" defaultValue="4200" className="w-full h-1.5 bg-black/10 rounded-lg appearance-none cursor-pointer accent-[#FF5A3C]" />
+                  <div className="flex justify-between text-[10px] text-black/45 font-mono"><span>$0</span><span>$4,200 Limit</span><span>$10k+</span></div>
+                </div>
               </div>
-            </div>
 
-            <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5">
-              <h3 className="text-sm font-black text-black uppercase tracking-[0.24em] mb-4">Platform Quick Actions</h3>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: 'Register Asset', icon: Plus, bg: 'bg-[#FF5A3C] text-white' },
-                  { label: 'Book Resource', icon: Calendar, bg: 'bg-[#8B7FE8] text-white' },
-                  { label: 'File Repair', icon: Wrench, bg: 'bg-black text-white' },
-                  { label: 'Pull Reports', icon: BarChart3, bg: 'bg-black/5 text-black' }
-                ].map((action) => {
-                  const Icon = action.icon
-                  return (
-                    <button
-                      key={action.label}
-                      className="flex flex-col items-center justify-center gap-2 rounded-[22px] border border-black/5 bg-white px-4 py-4 text-center shadow-[0_10px_24px_rgba(17,17,17,0.05)] transition-transform hover:scale-[1.02]"
-                    >
-                      <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${action.bg}`}>
-                        <Icon size={18} />
+              <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5">
+                <h3 className="text-sm font-black text-black uppercase tracking-[0.24em] mb-4 flex items-center gap-2">
+                  <Activity size={14} className="text-[#8B7FE8]" /> Operations Status
+                </h3>
+                <div className="flex flex-col gap-3 text-xs">
+                  {[
+                    { label: 'Available stock', color: 'bg-[#FF5A3C]', checked: true },
+                    { label: 'Allocated assets', color: 'bg-[#8B7FE8]', checked: true },
+                    { label: 'In maintenance', color: 'bg-black', checked: false },
+                    { label: 'Anomalies flagged', color: 'bg-[#C9CCD3]', checked: false }
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between text-black/65">
+                      <span className="flex items-center gap-2"><span className={`w-1.5 h-1.5 rounded-full ${item.color}`} />{item.label}</span>
+                      <input type="checkbox" defaultChecked={item.checked} className="rounded border-black/20 bg-white text-[#FF5A3C] focus:ring-[#FF5A3C]/20 w-4 h-4" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5">
+                <h3 className="text-sm font-black text-black uppercase tracking-[0.24em] mb-4">Platform Quick Actions</h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: 'Register Asset', icon: Plus, bg: 'bg-[#FF5A3C] text-white' },
+                    { label: 'Book Resource', icon: Calendar, bg: 'bg-[#8B7FE8] text-white' },
+                    { label: 'File Repair', icon: Wrench, bg: 'bg-black text-white' },
+                    { label: 'Pull Reports', icon: BarChart3, bg: 'bg-black/5 text-black' }
+                  ].map((action) => {
+                    const Icon = action.icon
+                    return (
+                      <button key={action.label} className="flex flex-col items-center justify-center gap-2 rounded-[22px] border border-black/5 bg-white px-4 py-4 text-center shadow-[0_10px_24px_rgba(17,17,17,0.05)] transition-transform hover:scale-[1.02]">
+                        <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${action.bg}`}><Icon size={18} /></div>
+                        <span className="text-xs font-semibold text-black/80">{action.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5 md:col-span-2">
+                <h3 className="text-sm font-black text-black uppercase tracking-[0.24em] mb-4">Logistics Feed</h3>
+                <div className="space-y-3">
+                  {notifications.slice(0, 3).map((notif) => (
+                    <div key={notif.id} className="flex gap-3 pb-3 border-b border-black/5 last:border-0 last:pb-0 items-start text-xs">
+                      <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${notif.read ? 'bg-black/20' : 'bg-[#FF5A3C] shadow-[0_0_6px_rgba(255,90,60,0.28)]'}`} />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-black font-medium truncate">{notif.title}</p>
+                        <p className="text-[10px] text-black/45 mt-0.5">{notif.timestamp}</p>
                       </div>
-                      <span className="text-xs font-semibold text-black/80">{action.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-
-            <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5">
-              <h3 className="text-sm font-black text-black uppercase tracking-[0.24em] mb-4">Logistics Feed</h3>
-              <div className="space-y-3">
-                {notifications.slice(0, 3).map((notif) => (
-                  <div key={notif.id} className="flex gap-3 pb-3 border-b border-black/5 last:border-0 last:pb-0 items-start text-xs">
-                    <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${notif.read ? 'bg-black/20' : 'bg-[#FF5A3C] shadow-[0_0_6px_rgba(255,90,60,0.28)]'}`} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-black font-medium truncate">{notif.title}</p>
-                      <p className="text-[10px] text-black/45 mt-0.5">{notif.timestamp}</p>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                <Link to="/notifications" className="text-[#FF5A3C] hover:text-black text-xs font-semibold mt-4 inline-flex items-center gap-1">
+                  View audit trail <ArrowRight size={12} />
+                </Link>
               </div>
-              <Link to="/notifications" className="text-[#FF5A3C] hover:text-black text-xs font-semibold mt-4 inline-flex items-center gap-1">
-                View audit trail <ArrowRight size={12} />
-              </Link>
-            </div>
 
-            <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-4 flex flex-col sm:flex-row gap-4 justify-between items-center text-xs">
-              <div className="flex items-center gap-2.5">
-                <span className="w-2 h-2 rounded-full bg-[#FF5A3C] animate-pulse" />
-                <span className="text-black/55 font-medium font-mono uppercase tracking-wider">Operational Summary</span>
-              </div>
-              <div className="flex flex-wrap items-center gap-6 text-[11px]">
-                <div>
-                  <span className="text-black/45">Asset Depreciation: </span>
-                  <span className="text-black font-bold font-mono">14.2% YoY</span>
+              <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-4 flex flex-col sm:flex-row gap-4 justify-between items-center text-xs md:col-span-2">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-2 h-2 rounded-full bg-[#FF5A3C] animate-pulse" />
+                  <span className="text-black/55 font-medium font-mono uppercase tracking-wider">Operational Summary</span>
                 </div>
-                <div>
-                  <span className="text-black/45">Allocation Velocity: </span>
-                  <span className="text-[#FF5A3C] font-bold font-mono">+8.4% MoM</span>
-                </div>
-                <div>
-                  <span className="text-black/45">Active Vector Transfers: </span>
-                  <span className="text-[#8B7FE8] font-bold font-mono">5 Streams</span>
+                <div className="flex flex-wrap items-center gap-6 text-[11px]">
+                  <div><span className="text-black/45">Asset Depreciation: </span><span className="text-black font-bold font-mono">14.2% YoY</span></div>
+                  <div><span className="text-black/45">Allocation Velocity: </span><span className="text-[#FF5A3C] font-bold font-mono">+8.4% MoM</span></div>
+                  <div><span className="text-black/45">Active Vector Transfers: </span><span className="text-[#8B7FE8] font-bold font-mono">5 Streams</span></div>
                 </div>
               </div>
-            </div>
 
-            <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5">
-              <h3 className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/45 text-center mb-4">
-                Verified Asset Architectures & Ecosystem Integrations
-              </h3>
-              <div className="flex flex-wrap justify-center gap-3">
-                {[
-                  { label: 'Dell Server Rack', icon: Server },
-                  { label: 'Apple Mac Studio', icon: Laptop },
-                  { label: 'Cisco Routing Hub', icon: Activity },
-                  { label: 'Samsung Displays', icon: Monitor },
-                  { label: 'Android Mobile SDK', icon: Terminal },
-                  { label: 'Docker container', icon: Layers }
-                ].map((tech, idx) => {
-                  const Icon = tech.icon
-                  return (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-2.5 rounded-full border border-black/5 bg-white px-4 py-3 text-xs font-semibold text-black/70 shadow-[0_8px_20px_rgba(17,17,17,0.04)]"
-                    >
-                      <Icon size={14} className="text-[#FF5A3C]" />
-                      <span>{tech.label}</span>
-                    </div>
-                  )
-                })}
+              <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5 md:col-span-2">
+                <h3 className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/45 text-center mb-4">Verified Asset Architectures & Ecosystem Integrations</h3>
+                <div className="flex flex-wrap justify-center gap-3">
+                  {[
+                    { label: 'Dell Server Rack', icon: Server },
+                    { label: 'Apple Mac Studio', icon: Laptop },
+                    { label: 'Cisco Routing Hub', icon: Activity },
+                    { label: 'Samsung Displays', icon: Monitor },
+                    { label: 'Android Mobile SDK', icon: Terminal },
+                    { label: 'Docker container', icon: Layers }
+                  ].map((tech, idx) => {
+                    const Icon = tech.icon
+                    return (
+                      <div key={idx} className="flex items-center gap-2.5 rounded-full border border-black/5 bg-white px-4 py-3 text-xs font-semibold text-black/70 shadow-[0_8px_20px_rgba(17,17,17,0.04)]">
+                        <Icon size={14} className="text-[#FF5A3C]" />
+                        <span>{tech.label}</span>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="lg:col-span-9 flex flex-col gap-8">
+          <div className="lg:col-span-8 flex flex-col gap-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
               <div>
                 <h1 className="text-[38px] sm:text-[40px] font-black text-black tracking-tight">Dashboard</h1>
@@ -355,67 +338,22 @@ export default function Dashboard() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                {
-                  label: 'Total Assets',
-                  val: totalAssets,
-                  sub: '+2 this month',
-                  icon: Package,
-                  tone: 'orange'
-                },
-                {
-                  label: 'Allocated',
-                  val: allocatedAssets,
-                  sub: `${Math.round(allocatedAssets / (totalAssets || 1) * 100)}% utilization`,
-                  icon: TrendingUp,
-                  tone: 'purple'
-                },
-                {
-                  label: 'Available',
-                  val: availableAssets,
-                  sub: `${bookings.length} pending bookings`,
-                  icon: Calendar,
-                  tone: 'light'
-                },
-                {
-                  label: 'Maintenance',
-                  val: maintenanceCount,
-                  sub: 'Needs attention',
-                  icon: Wrench,
-                  tone: 'dark'
-                }
+                { label: 'Total Assets', val: totalAssets, sub: '+2 this month', icon: Package, tone: 'orange' },
+                { label: 'Allocated', val: allocatedAssets, sub: `${Math.round(allocatedAssets / (totalAssets || 1) * 100)}% utilization`, icon: TrendingUp, tone: 'purple' },
+                { label: 'Available', val: availableAssets, sub: `${bookings.length} pending bookings`, icon: Calendar, tone: 'light' },
+                { label: 'Maintenance', val: maintenanceCount, sub: 'Needs attention', icon: Wrench, tone: 'dark' }
               ].map((stat, idx) => {
                 const IconComp = stat.icon
-
-                const toneClasses = {
-                  orange: 'bg-[#FF5A3C] text-white',
-                  purple: 'bg-[#8B7FE8] text-white',
-                  light: 'bg-white text-black border border-black/8',
-                  dark: 'bg-[#1A1A1A] text-white'
-                }
-
-                const iconBoxClasses = {
-                  orange: 'bg-white/18 text-white border border-white/18',
-                  purple: 'bg-white/18 text-white border border-white/18',
-                  light: 'bg-[#FFF1EC] text-[#FF5A3C]',
-                  dark: 'bg-white/12 text-white border border-white/12'
-                }
+                const toneClasses = { orange: 'bg-[#FF5A3C] text-white', purple: 'bg-[#8B7FE8] text-white', light: 'bg-white text-black border border-black/8', dark: 'bg-[#1A1A1A] text-white' }
+                const iconBoxClasses = { orange: 'bg-white/20 text-white border border-white/20', purple: 'bg-white/20 text-white border border-white/20', light: 'bg-[#FFF1EC] text-[#FF5A3C]', dark: 'bg-white/15 text-white border border-white/15' }
 
                 return (
-                  <div
-                    key={idx}
-                    className={`rounded-[24px] p-5 shadow-[0_14px_34px_rgba(17,17,17,0.08)] ${toneClasses[stat.tone]}`}
-                  >
+                  <div key={idx} className={`rounded-[24px] p-5 shadow-[0_14px_34px_rgba(17,17,17,0.08)] ${toneClasses[stat.tone]}`}>
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
-                        <p className={`text-sm font-medium ${stat.tone === 'light' ? 'text-black/55' : 'text-white/75'}`}>
-                          {stat.label}
-                        </p>
-                        <p className={`mt-2 text-[34px] leading-none font-black ${stat.tone === 'light' ? 'text-black' : 'text-white'}`}>
-                          {stat.val}
-                        </p>
-                        <p className={`mt-3 text-sm ${stat.tone === 'light' ? 'text-black/55' : 'text-white/75'}`}>
-                          {stat.sub}
-                        </p>
+                        <p className={`text-sm font-medium ${stat.tone === 'light' ? 'text-black/55' : 'text-white/75'}`}>{stat.label}</p>
+                        <p className={`mt-2 text-[34px] leading-none font-black ${stat.tone === 'light' ? 'text-black' : 'text-white'}`}>{stat.val}</p>
+                        <p className={`mt-3 text-sm ${stat.tone === 'light' ? 'text-black/55' : 'text-white/75'}`}>{stat.sub}</p>
                       </div>
                       <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${iconBoxClasses[stat.tone]}`}>
                         <IconComp size={20} />
@@ -494,88 +432,6 @@ export default function Dashboard() {
                     </div>
                   ))}
                 </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-black mb-5">Platform Quick Actions</h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { label: 'Register Asset', path: '/assets', icon: Plus, bg: 'bg-[#FFF2EE] text-[#FF5A3C]' },
-                    { label: 'Book Resource', path: '/bookings', icon: Calendar, bg: 'bg-[#F0ECFF] text-[#8B7FE8]' },
-                    { label: 'File Repair', path: '/maintenance', icon: Wrench, bg: 'bg-black/5 text-black' },
-                    { label: 'Pull Reports', path: '/reports', icon: BarChart3, bg: 'bg-black text-white' }
-                  ].map((action, i) => {
-                    const Icon = action.icon
-                    return (
-                      <Link
-                        key={i}
-                        to={action.path}
-                        className="group flex flex-col items-center justify-center gap-2 rounded-2xl border border-black/5 p-4 text-center transition-transform hover:scale-[1.02]"
-                      >
-                        <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${action.bg}`}>
-                          <Icon size={18} />
-                        </div>
-                        <span className="text-xs font-semibold text-black/80">{action.label}</span>
-                      </Link>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-black mb-5">Today's Events</h3>
-                <div className="relative pl-3">
-                  <div className="absolute left-5 top-2 bottom-2 border-l-2 border-dashed border-black/12" />
-                  <div className="space-y-4">
-                    {eventRows.map((event, index) => (
-                      <div key={event.label} className="relative flex items-center gap-3">
-                        <div
-                          className="absolute left-0 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white text-[11px] font-bold text-white shadow-[0_10px_24px_rgba(17,17,17,0.12)]"
-                          style={{ backgroundColor: event.tone }}
-                        >
-                          {event.initials}
-                        </div>
-                        <div className="ml-10 flex-1 rounded-full px-4 py-3 text-white shadow-[0_10px_24px_rgba(17,17,17,0.08)]" style={{ backgroundColor: event.tone }}>
-                          <div className="flex items-center justify-between gap-4">
-                            <span className="text-sm font-semibold">{event.label}</span>
-                            <span className="text-[11px] font-medium text-white/80">
-                              {index === 0 ? '09:30' : index === 1 ? '11:00' : '14:30'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5">
-              <h3 className="text-[11px] font-semibold uppercase tracking-[0.28em] text-black/45 text-center mb-4">
-                Verified Asset Architectures & Ecosystem Integrations
-              </h3>
-              <div className="flex flex-wrap justify-center gap-3">
-                {[
-                  { label: 'Dell Server Rack', icon: Server },
-                  { label: 'Apple Mac Studio', icon: Laptop },
-                  { label: 'Cisco Routing Hub', icon: Activity },
-                  { label: 'Samsung Displays', icon: Monitor },
-                  { label: 'Android Mobile SDK', icon: Terminal },
-                  { label: 'Docker container', icon: Layers }
-                ].map((tech, idx) => {
-                  const Icon = tech.icon
-                  return (
-                    <div
-                      key={idx}
-                      className="flex items-center gap-2.5 rounded-full border border-black/5 bg-black/3 px-4 py-3 text-xs font-semibold text-black/70 shadow-[0_8px_20px_rgba(17,17,17,0.04)]"
-                    >
-                      <Icon size={14} className="text-[#FF5A3C]" />
-                      <span>{tech.label}</span>
-                    </div>
-                  )
-                })}
               </div>
             </div>
           </div>

@@ -1,7 +1,11 @@
 import React from 'react'
+import { useLocation } from 'react-router-dom'
 import Navbar from './Navbar'
 
 export default function MainLayout({ children }) {
+  const location = useLocation()
+  const isDashboard = location.pathname === '/dashboard'
+
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Immersive mesh gradient blobs */}
@@ -11,8 +15,8 @@ export default function MainLayout({ children }) {
       {/* Noise overlay for premium grain feel */}
       <div className="absolute inset-0 bg-grid-pattern opacity-40 pointer-events-none -z-20" />
 
-      <Navbar />
-      <main className="pt-14 relative z-10 overflow-auto">
+      {!isDashboard && <Navbar />}
+      <main className={`${isDashboard ? 'pt-0' : 'pt-14'} relative z-10 overflow-auto`}>
         <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
           {children}
         </div>
