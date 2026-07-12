@@ -1,88 +1,72 @@
-import React, { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+
+import api from '../api'
 
 const AuthContext = createContext()
 
+function storeTokens(accessToken, refreshToken) {
+  localStorage.setItem('access_token', accessToken)
+  localStorage.setItem('refresh_token', refreshToken)
+}
+
+function clearTokens() {
+  localStorage.removeItem('access_token')
+  localStorage.removeItem('refresh_token')
+}
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
 
-  const login = useCallback((email, password) => {
-    setIsLoading(true)
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const mockUser = {
-          id: Math.random().toString(36).substr(2, 9),
-          email,
-          name: email.split('@')[0],
-          role: 'employee',
-          department: 'Engineering',
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
-        }
-        setUser(mockUser)
-        setIsAuthenticated(true)
+  useEffect(() => {
+    const restoreSession = async () => {
+      const token = localStorage.getItem('access_token')
+      if (!token) {
         setIsLoading(false)
-        resolve(mockUser)
-      }, 1000)
-    })
+        return
+      }
+      try {
+        const res = await api.get('/auth/me')
+        setUser(res.data)
+        setIsAuthenticated(true)
+      } catch {
+        clearTokens()
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    restoreSession()
   }, [])
 
-  const signup = useCallback((email, password, name) => {
-    setIsLoading(true)
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const mockUser = {
-          id: Math.random().toString(36).substr(2, 9),
-          email,
-          name,
-          role: 'employee',
-          department: 'New Department',
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`
-        }
-        setUser(mockUser)
-        setIsAuthenticated(true)
-        setIsLoading(false)
-        resolve(mockUser)
-      }, 1000)
-    })
+  const login = useCallback(async (email, password) => {
+    const res = await api.post('/auth/login', { email, password })
+    const { access_token, refresh_token, user: userData } = res.data
+    storeTokens(access_token, refresh_token)
+    setUser(userData)
+    setIsAuthenticated(true)
+    return userData
   }, [])
 
-  const oauthLogin = useCallback((provider) => {
-    setIsLoading(true)
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const mockUser = {
-          id: Math.random().toString(36).substr(2, 9),
-          email: `user@${provider}.com`,
-          name: `OAuth User`,
-          role: 'employee',
-          department: 'Engineering',
-          provider,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${provider}`
-        }
-        setUser(mockUser)
-        setIsAuthenticated(true)
-        setIsLoading(false)
-        resolve(mockUser)
-      }, 1500)
-    })
+  const signup = useCallback(async (firstName, lastName, email, password, phone) => {
+    const payload = { first_name: firstName, last_name: lastName, email, password }
+    if (phone) payload.phone = phone
+    const res = await api.post('/auth/register', payload)
+    const { access_token, refresh_token, user: userData } = res.data
+    storeTokens(access_token, refresh_token)
+    setUser(userData)
+    setIsAuthenticated(true)
+    return userData
   }, [])
 
   const logout = useCallback(() => {
+    clearTokens()
     setUser(null)
     setIsAuthenticated(false)
   }, [])
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      isLoading,
-      isAuthenticated,
-      login,
-      signup,
-      oauthLogin,
-      logout
-    }}>
+    <AuthContext.Provider value={{ user, isLoading, isAuthenticated, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
   )
