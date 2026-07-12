@@ -4,7 +4,7 @@ import { useForm } from '../../hooks/useForm'
 import api from '../../api'
 import { toast } from 'sonner'
 
-export default function BookingModal({ onClose, onSubmit }) {
+export default function BookingModal({ onClose, onSubmit, defaultValues }) {
   const [assets, setAssets] = useState([])
   const [loadingAssets, setLoadingAssets] = useState(true)
 
@@ -17,43 +17,36 @@ export default function BookingModal({ onClose, onSubmit }) {
 
   const { values, errors, touched, isSubmitting, handleChange, handleBlur, handleSubmit, setFieldError } = useForm(
     {
-      assetId: '',
-      date: '',
-      startTime: '',
-      endTime: '',
-      purpose: ''
+      assetId:   defaultValues?.assetId   || '',
+      date:      defaultValues?.date      || '',
+      startTime: defaultValues?.startTime || '',
+      endTime:   defaultValues?.endTime   || '',
+      purpose:   '',
     },
     async (formValues) => {
-      if (!formValues.assetId) {
-        setFieldError('assetId', 'Resource is required')
-        return
-      }
-      if (!formValues.date) {
-        setFieldError('date', 'Date is required')
-        return
-      }
-      if (!formValues.startTime) {
-        setFieldError('startTime', 'Start time is required')
-        return
-      }
-      if (!formValues.endTime) {
-        setFieldError('endTime', 'End time is required')
+      if (!formValues.assetId)    { setFieldError('assetId', 'Resource is required');    return }
+      if (!formValues.date)       { setFieldError('date', 'Date is required');           return }
+      if (!formValues.startTime)  { setFieldError('startTime', 'Start time is required'); return }
+      if (!formValues.endTime)    { setFieldError('endTime', 'End time is required');    return }
+
+      const start = new Date(`${formValues.date}T${formValues.startTime}`)
+      const end   = new Date(`${formValues.date}T${formValues.endTime}`)
+      if (end <= start) {
+        setFieldError('endTime', 'End time must be after start time')
         return
       }
 
       await onSubmit({
-        asset_id: formValues.assetId,
-        start_time: new Date(`${formValues.date}T${formValues.startTime}`).toISOString(),
-        end_time: new Date(`${formValues.date}T${formValues.endTime}`).toISOString(),
-        purpose: formValues.purpose || null
+        asset_id:   formValues.assetId,
+        start_time: start.toISOString(),
+        end_time:   end.toISOString(),
+        purpose:    formValues.purpose || null,
       })
     }
   )
 
   const handleKeyPress = (e) => {
-    if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-      handleSubmit(e)
-    }
+    if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleSubmit(e)
   }
 
   return (
@@ -61,16 +54,12 @@ export default function BookingModal({ onClose, onSubmit }) {
       <div className="bg-bg-secondary border border-border-color rounded-2xl max-w-md w-full shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-border-color">
-          <h2 className="text-2xl font-bold text-foreground">Book Resource</h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-bg-tertiary rounded-lg transition-colors"
-          >
+          <h2 className="text-2xl font-bold text-foreground">Book a Slot</h2>
+          <button onClick={onClose} className="p-2 hover:bg-bg-tertiary rounded-lg transition-colors">
             <X size={20} />
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Resource */}
           <div>
@@ -83,7 +72,7 @@ export default function BookingModal({ onClose, onSubmit }) {
               className="input-base"
               disabled={loadingAssets}
             >
-              <option value="">{loadingAssets ? 'Loading...' : 'Select a resource'}</option>
+              <option value="">{loadingAssets ? 'Loading…' : 'Select a resource'}</option>
               {assets.map(a => (
                 <option key={a.id} value={a.id}>{a.name}</option>
               ))}
@@ -109,38 +98,38 @@ export default function BookingModal({ onClose, onSubmit }) {
             )}
           </div>
 
-          {/* Start Time */}
-          <div>
-            <label className="label-base">Start Time *</label>
-            <input
-              type="time"
-              name="startTime"
-              value={values.startTime}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              onKeyPress={handleKeyPress}
-              className="input-base"
-            />
-            {touched.startTime && errors.startTime && (
-              <p className="text-danger text-sm mt-1">{errors.startTime}</p>
-            )}
-          </div>
-
-          {/* End Time */}
-          <div>
-            <label className="label-base">End Time *</label>
-            <input
-              type="time"
-              name="endTime"
-              value={values.endTime}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              onKeyPress={handleKeyPress}
-              className="input-base"
-            />
-            {touched.endTime && errors.endTime && (
-              <p className="text-danger text-sm mt-1">{errors.endTime}</p>
-            )}
+          {/* Start / End Time side by side */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="label-base">Start Time *</label>
+              <input
+                type="time"
+                name="startTime"
+                value={values.startTime}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                onKeyPress={handleKeyPress}
+                className="input-base"
+              />
+              {touched.startTime && errors.startTime && (
+                <p className="text-danger text-sm mt-1">{errors.startTime}</p>
+              )}
+            </div>
+            <div>
+              <label className="label-base">End Time *</label>
+              <input
+                type="time"
+                name="endTime"
+                value={values.endTime}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                onKeyPress={handleKeyPress}
+                className="input-base"
+              />
+              {touched.endTime && errors.endTime && (
+                <p className="text-danger text-sm mt-1">{errors.endTime}</p>
+              )}
+            </div>
           </div>
 
           {/* Purpose */}
@@ -154,25 +143,15 @@ export default function BookingModal({ onClose, onSubmit }) {
               onBlur={handleBlur}
               onKeyPress={handleKeyPress}
               className="input-base"
-              placeholder="Optional"
+              placeholder="e.g. Team meeting, Training session…"
             />
           </div>
 
           {/* Buttons */}
-          <div className="flex gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn-secondary flex-1"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting || loadingAssets}
-              className="btn-primary flex-1"
-            >
-              {isSubmitting ? 'Booking...' : 'Book Now'}
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={onClose} className="btn-secondary flex-1">Cancel</button>
+            <button type="submit" disabled={isSubmitting || loadingAssets} className="btn-primary flex-1">
+              {isSubmitting ? 'Booking…' : 'Book Now'}
             </button>
           </div>
         </form>
