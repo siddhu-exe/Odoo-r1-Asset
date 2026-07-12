@@ -8,6 +8,7 @@ from app.modules.employees import service
 from app.modules.employees.schemas import (
     CreateEmployeeRequest,
     EmployeeResponse,
+    RegisterFcmTokenRequest,
     UpdateEmployeeRequest,
     UpdateRoleRequest,
     UpdateStatusRequest,
@@ -78,3 +79,12 @@ async def update_status(
     return await service.update_employee_status(
         employee_id, request, current_employee_id, session
     )
+
+
+@router.patch("/me/fcm-token", status_code=204)
+async def register_fcm_token(
+    request: RegisterFcmTokenRequest,
+    session: SessionDep,
+    current_employee_id: CurrentEmployeeId,
+) -> None:
+    await service.register_fcm_token(current_employee_id, request, session)

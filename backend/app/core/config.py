@@ -22,6 +22,8 @@ class Settings(BaseSettings):
     ADMIN_FIRST_NAME: str = "System"
     ADMIN_LAST_NAME: str = "Admin"
 
+    FIREBASE_CREDENTIALS_BASE64: str = ""
+
     @property
     def cors_origins(self) -> list[str]:
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]

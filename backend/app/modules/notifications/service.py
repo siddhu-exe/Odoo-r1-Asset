@@ -3,6 +3,7 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.enums import NotificationType
+from app.core.firebase import send_push_notification
 from app.modules.notifications.models import ActivityLog, Notification
 from app.modules.notifications.repository import ActivityLogRepository, NotificationRepository
 
@@ -27,6 +28,12 @@ async def dispatch_notification(
     )
     session.add(notification)
     await session.flush()
+
+    from app.modules.employees.repository import EmployeeRepository
+
+    employee = await EmployeeRepository(session).get_by_id(employee_id)
+    if employee and employee.fcm_token:
+        await send_push_notification(employee.fcm_token, title, message)
 
 
 async def record_activity(
