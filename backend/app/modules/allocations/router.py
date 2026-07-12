@@ -43,6 +43,29 @@ async def create_allocation(
     return await service.create_allocation(request, current_employee_id, session)
 
 
+@router.get("/transfers", response_model=list[TransferRequestResponse])
+async def list_transfers(
+    session: SessionDep,
+) -> list[TransferRequestResponse]:
+    return await service.list_transfers(session)
+
+
+@router.get("/overdue", response_model=list[AllocationResponse])
+async def list_overdue(
+    session: SessionDep,
+    _: Annotated[None, AssetManagerOnly],
+) -> list[AllocationResponse]:
+    return await service.list_overdue_allocations(session)
+
+
+@router.get("/{allocation_id}", response_model=AllocationResponse)
+async def get_allocation(
+    allocation_id: uuid.UUID,
+    session: SessionDep,
+) -> AllocationResponse:
+    return await service.get_allocation(allocation_id, session)
+
+
 @router.post("/{allocation_id}/return", response_model=AllocationResponse)
 async def return_asset(
     allocation_id: uuid.UUID,
@@ -52,14 +75,6 @@ async def return_asset(
     _: Annotated[None, AssetManagerOnly],
 ) -> AllocationResponse:
     return await service.return_asset(allocation_id, request, current_employee_id, session)
-
-
-@router.get("/overdue", response_model=list[AllocationResponse])
-async def list_overdue(
-    session: SessionDep,
-    _: Annotated[None, AssetManagerOnly],
-) -> list[AllocationResponse]:
-    return await service.list_overdue_allocations(session)
 
 
 @router.post("/transfers", response_model=TransferRequestResponse, status_code=201)

@@ -33,6 +33,14 @@ async def create_booking(
     return await service.create_booking(request, current_employee_id, session)
 
 
+@router.get("/{booking_id}", response_model=BookingResponse)
+async def get_booking(
+    booking_id: uuid.UUID,
+    session: SessionDep,
+) -> BookingResponse:
+    return await service.get_booking(booking_id, session)
+
+
 @router.patch("/{booking_id}/cancel", response_model=BookingResponse)
 async def cancel_booking(
     booking_id: uuid.UUID,

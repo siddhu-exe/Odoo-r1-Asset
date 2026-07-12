@@ -30,6 +30,22 @@ async def list_audit_cycles(
     return await service.list_audit_cycles(session, params)
 
 
+@router.get("/{cycle_id}", response_model=AuditCycleResponse)
+async def get_audit_cycle(
+    cycle_id: uuid.UUID,
+    session: SessionDep,
+) -> AuditCycleResponse:
+    return await service.get_audit_cycle(cycle_id, session)
+
+
+@router.get("/{cycle_id}/items", response_model=list[AuditItemResponse])
+async def list_audit_items(
+    cycle_id: uuid.UUID,
+    session: SessionDep,
+) -> list[AuditItemResponse]:
+    return await service.list_audit_items(cycle_id, session)
+
+
 @router.post("", response_model=AuditCycleResponse, status_code=201)
 async def create_audit_cycle(
     request: CreateAuditCycleRequest,

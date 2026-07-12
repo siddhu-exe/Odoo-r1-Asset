@@ -33,6 +33,24 @@ async def list_audit_cycles(
     return PaginatedResponse.build(items=cycles, total=total, params=params)
 
 
+async def get_audit_cycle(
+    cycle_id: uuid.UUID,
+    session: AsyncSession,
+) -> AuditCycle:
+    repository = AuditCycleRepository(session)
+    return await repository.get_by_id_or_raise(cycle_id)
+
+
+async def list_audit_items(
+    cycle_id: uuid.UUID,
+    session: AsyncSession,
+) -> list[AuditItem]:
+    cycle_repository = AuditCycleRepository(session)
+    await cycle_repository.get_by_id_or_raise(cycle_id)
+    item_repository = AuditItemRepository(session)
+    return await item_repository.list_for_cycle(cycle_id)
+
+
 async def create_audit_cycle(
     request: CreateAuditCycleRequest,
     created_by: uuid.UUID,
@@ -54,16 +72,24 @@ async def create_audit_cycle(
     assets_query = select(Asset).where(Asset.status != AssetStatus.DISPOSED)
 
     if request.scope_department_id:
-        from sqlalchemy import select as sa_select
+        from sqlalchemy import select as sa_select, union_all
         from app.modules.allocations.models import Allocation
+        from app.modules.employees.models import Employee
         from app.core.enums import AllocationStatus
-        allocated_asset_ids_result = await session.execute(
-            sa_select(Allocation.asset_id).where(
-                Allocation.department_id == request.scope_department_id,
-                Allocation.status == AllocationStatus.ACTIVE,
-            )
+
+        direct_dept = sa_select(Allocation.asset_id).where(
+            Allocation.department_id == request.scope_department_id,
+            Allocation.status == AllocationStatus.ACTIVE,
         )
-        asset_ids = [row[0] for row in allocated_asset_ids_result.fetchall()]
+        via_employee = sa_select(Allocation.asset_id).join(
+            Employee, Employee.id == Allocation.employee_id
+        ).where(
+            Employee.department_id == request.scope_department_id,
+            Allocation.status == AllocationStatus.ACTIVE,
+        )
+        combined = union_all(direct_dept, via_employee).subquery()
+        asset_ids_result = await session.execute(sa_select(combined))
+        asset_ids = list({row[0] for row in asset_ids_result.fetchall()})
         assets_query = select(Asset).where(Asset.id.in_(asset_ids))
 
     if request.scope_location:

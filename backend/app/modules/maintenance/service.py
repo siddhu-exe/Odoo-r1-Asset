@@ -47,6 +47,14 @@ async def list_maintenance_requests(
     return PaginatedResponse.build(items=requests, total=total, params=params)
 
 
+async def get_maintenance_request(
+    request_id: uuid.UUID,
+    session: AsyncSession,
+) -> MaintenanceRequest:
+    repository = MaintenanceRepository(session)
+    return await repository.get_by_id_or_raise(request_id)
+
+
 async def create_maintenance_request(
     request: CreateMaintenanceRequest,
     raised_by: uuid.UUID,
@@ -101,7 +109,6 @@ async def reject_request(
     assert_valid_transition(maintenance_request.status, MaintenanceStatus.REJECTED)
 
     maintenance_request.status = MaintenanceStatus.REJECTED
-    maintenance_request.approved_by = rejected_by
 
     await session.flush()
     await session.refresh(maintenance_request)

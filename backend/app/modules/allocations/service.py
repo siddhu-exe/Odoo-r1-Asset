@@ -101,6 +101,21 @@ async def list_overdue_allocations(session: AsyncSession) -> list[Allocation]:
     return await repository.list_overdue()
 
 
+async def get_allocation(
+    allocation_id: uuid.UUID,
+    session: AsyncSession,
+) -> Allocation:
+    repository = AllocationRepository(session)
+    return await repository.get_by_id_or_raise(allocation_id)
+
+
+async def list_transfers(
+    session: AsyncSession,
+) -> list[TransferRequest]:
+    repository = TransferRequestRepository(session)
+    return await repository.list_all()
+
+
 async def create_transfer_request(
     request: CreateTransferRequest,
     requested_by: uuid.UUID,

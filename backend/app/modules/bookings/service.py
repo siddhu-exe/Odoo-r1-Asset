@@ -61,6 +61,14 @@ async def create_booking(
     return await booking_repository.create(booking)
 
 
+async def get_booking(
+    booking_id: uuid.UUID,
+    session: AsyncSession,
+) -> Booking:
+    repository = BookingRepository(session)
+    return await repository.get_by_id_or_raise(booking_id)
+
+
 async def cancel_booking(
     booking_id: uuid.UUID,
     cancelled_by: uuid.UUID,

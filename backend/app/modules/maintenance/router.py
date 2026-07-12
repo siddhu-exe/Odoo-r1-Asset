@@ -28,6 +28,14 @@ async def list_maintenance_requests(
     return await service.list_maintenance_requests(session, params)
 
 
+@router.get("/{request_id}", response_model=MaintenanceRequestResponse)
+async def get_maintenance_request(
+    request_id: uuid.UUID,
+    session: SessionDep,
+) -> MaintenanceRequestResponse:
+    return await service.get_maintenance_request(request_id, session)
+
+
 @router.post("", response_model=MaintenanceRequestResponse, status_code=201)
 async def create_maintenance_request(
     request: CreateMaintenanceRequest,
