@@ -1,0 +1,573 @@
+{
+  "allocations": {
+    "AllocationResponse": {
+      "id": "e3b8a1c9-7df9-4672-8f12-3a5214f4e7c0",
+      "asset_id": "c1f7b8a2-89cd-4ef1-9012-3456789abcde",
+      "employee_id": "b2e5c8fa-8123-4def-9abc-d0123456789a",
+      "department_id": "a1d4b7c8-9012-3def-4abc-567890123456",
+      "allocated_by": "00000000-0000-0000-0000-000000000000",
+      "status": "active",
+      "expected_return_date": "2026-08-12",
+      "returned_at": null,
+      "condition_on_return": null,
+      "return_notes": null,
+      "created_at": "2026-07-12T14:14:06Z",
+      "updated_at": "2026-07-12T14:14:06Z"
+    },
+    "CreateAllocationRequest": {
+      "asset_id": "c1f7b8a2-89cd-4ef1-9012-3456789abcde",
+      "employee_id": "b2e5c8fa-8123-4def-9abc-d0123456789a",
+      "department_id": null,
+      "expected_return_date": "2026-08-12",
+      "notes": "Standard employee laptop issue"
+    },
+    "ReturnAssetRequest": {
+      "condition_on_return": "good",
+      "return_notes": "Returned on time with minor scratches on case."
+    },
+    "TransferRequestResponse": {
+      "id": "f4c9b2d0-8ea0-4f83-9a23-4b632505f8d1",
+      "asset_id": "c1f7b8a2-89cd-4ef1-9012-3456789abcde",
+      "from_employee_id": "b2e5c8fa-8123-4def-9abc-d0123456789a",
+      "to_employee_id": "11111111-2222-3333-4444-555555555555",
+      "requested_by": "b2e5c8fa-8123-4def-9abc-d0123456789a",
+      "approved_by": "00000000-0000-0000-0000-000000000000",
+      "status": "pending",
+      "reason": "Department transfer to developer role",
+      "rejection_notes": null,
+      "created_at": "2026-07-12T14:14:06Z",
+      "updated_at": "2026-07-12T14:14:06Z"
+    },
+    "CreateTransferRequest": {
+      "asset_id": "c1f7b8a2-89cd-4ef1-9012-3456789abcde",
+      "to_employee_id": "11111111-2222-3333-4444-555555555555",
+      "reason": "Transferring asset for project task"
+    },
+    "RejectTransferRequest": {
+      "rejection_notes": "Asset is currently required by current handler."
+    }
+  },
+  "assets": {
+    "AssetResponse": {
+      "id": "c1f7b8a2-89cd-4ef1-9012-3456789abcde",
+      "name": "MacBook Pro 16",
+      "asset_tag": "AF-0012",
+      "serial_number": "C02XYZ123ABC",
+      "category_id": "d2c8b7a1-6789-4def-8abc-901234567890",
+      "category_name": "Electronics",
+      "condition": "excellent",
+      "status": "available",
+      "location": "Bengaluru Office",
+      "is_bookable": false,
+      "acquisition_date": "2023-01-15",
+      "acquisition_cost": 210000.00,
+      "photo_url": "https://example.com/assets/af0012.png",
+      "document_url": "https://example.com/docs/af0012.pdf",
+      "notes": "Primary developer workstation",
+      "next_maintenance_date": "2026-10-15",
+      "expected_lifespan_years": 4,
+      "created_at": "2026-07-12T14:14:06Z",
+      "updated_at": "2026-07-12T14:14:06Z"
+    },
+    "CreateAssetRequest": {
+      "name": "MacBook Pro 16",
+      "serial_number": "C02XYZ123ABC",
+      "category_id": "d2c8b7a1-6789-4def-8abc-901234567890",
+      "condition": "excellent",
+      "location": "Bengaluru Office",
+      "is_bookable": false,
+      "acquisition_date": "2023-01-15",
+      "acquisition_cost": 210000.00,
+      "photo_url": null,
+      "document_url": null,
+      "notes": "Seeded developer laptop",
+      "next_maintenance_date": "2026-10-15",
+      "expected_lifespan_years": 4
+    },
+    "UpdateAssetRequest": {
+      "name": "MacBook Pro 16 M3 Max",
+      "condition": "excellent",
+      "location": "HQ Bengaluru",
+      "is_bookable": false,
+      "notes": "Upgraded logic board",
+      "photo_url": "https://example.com/assets/af0012_new.png",
+      "document_url": null,
+      "next_maintenance_date": "2026-12-01",
+      "expected_lifespan_years": 5
+    },
+    "AllocationHistoryEntry": {
+      "id": "e3b8a1c9-7df9-4672-8f12-3a5214f4e7c0",
+      "status": "returned",
+      "allocated_at": "2025-01-15T09:00:00Z",
+      "returned_at": "2026-01-15T18:00:00Z"
+    },
+    "MaintenanceHistoryEntry": {
+      "id": "11223344-5566-7788-9900-aabbccddeeff",
+      "status": "resolved",
+      "priority": "medium",
+      "description": "Screen flickering issue resolved by replacing display assembly.",
+      "raised_at": "2025-06-12T10:00:00Z"
+    },
+    "AssetHistoryResponse": {
+      "allocations": [
+        {
+          "id": "e3b8a1c9-7df9-4672-8f12-3a5214f4e7c0",
+          "status": "returned",
+          "allocated_at": "2025-01-15T09:00:00Z",
+          "returned_at": "2026-01-15T18:00:00Z"
+        }
+      ],
+      "maintenance_requests": [
+        {
+          "id": "11223344-5566-7788-9900-aabbccddeeff",
+          "status": "resolved",
+          "priority": "medium",
+          "description": "Screen flickering issue resolved by replacing display assembly.",
+          "raised_at": "2025-06-12T10:00:00Z"
+        }
+      ]
+    }
+  },
+  "audits": {
+    "AuditCycleResponse": {
+      "id": "9a234b63-2505-f8d1-f4c9-b2d08ea04f83",
+      "name": "Q3 2026 IT Assets Audit",
+      "scope_department_id": "a1d4b7c8-9012-3def-4abc-567890123456",
+      "scope_location": null,
+      "start_date": "2026-07-01",
+      "end_date": "2026-07-31",
+      "status": "in_progress",
+      "created_by": "b2e5c8fa-8123-4def-9abc-d0123456789a",
+      "created_at": "2026-07-12T14:14:06Z",
+      "updated_at": "2026-07-12T14:14:06Z"
+    },
+    "CreateAuditCycleRequest": {
+      "name": "Q3 2026 IT Assets Audit",
+      "scope_department_id": "a1d4b7c8-9012-3def-4abc-567890123456",
+      "scope_location": "Bengaluru Office",
+      "start_date": "2026-07-01",
+      "end_date": "2026-07-31"
+    },
+    "AssignAuditorRequest": {
+      "auditor_id": "b2e5c8fa-8123-4def-9abc-d0123456789a"
+    },
+    "AuditItemResponse": {
+      "id": "87f8b912-89cd-4ef1-9012-3456789abcde",
+      "cycle_id": "9a234b63-2505-f8d1-f4c9-b2d08ea04f83",
+      "asset_id": "c1f7b8a2-89cd-4ef1-9012-3456789abcde",
+      "auditor_id": "b2e5c8fa-8123-4def-9abc-d0123456789a",
+      "status": "verified",
+      "notes": "Verified visually, physical location matched inventory records.",
+      "verified_at": "2026-07-12T12:00:00Z"
+    },
+    "UpdateAuditItemRequest": {
+      "status": "verified",
+      "notes": "Physical condition verified as excellent."
+    },
+    "DiscrepancyReportResponse": {
+      "cycle_id": "9a234b63-2505-f8d1-f4c9-b2d08ea04f83",
+      "total_assets": 120,
+      "verified": 95,
+      "missing": 3,
+      "damaged": 2,
+      "pending": 20
+    }
+  },
+  "auth": {
+    "RegisterRequest": {
+      "email": "developer@company.com",
+      "password": "SecurePassword123",
+      "first_name": "John",
+      "last_name": "Doe",
+      "phone": "+91-9999988888"
+    },
+    "LoginRequest": {
+      "email": "developer@company.com",
+      "password": "SecurePassword123"
+    },
+    "RefreshRequest": {
+      "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkZXZlbG9wZXJAY29tcGFueS5jb20ifQ"
+    },
+    "ForgotPasswordRequest": {
+      "email": "developer@company.com"
+    },
+    "ResetPasswordRequest": {
+      "token": "reset-token-xyz-123",
+      "new_password": "NewSecurePassword123"
+    },
+    "ChangePasswordRequest": {
+      "current_password": "SecurePassword123",
+      "new_password": "NewSecurePassword123"
+    },
+    "AuthUserResponse": {
+      "id": "b2e5c8fa-8123-4def-9abc-d0123456789a",
+      "email": "developer@company.com",
+      "first_name": "John",
+      "last_name": "Doe",
+      "role": "employee",
+      "department_id": "a1d4b7c8-9012-3def-4abc-567890123456"
+    },
+    "TokenResponse": {
+      "access_token": "access-token-jwt-string",
+      "refresh_token": "refresh-token-jwt-string",
+      "token_type": "bearer"
+    },
+    "AuthResponse": {
+      "access_token": "access-token-jwt-string",
+      "refresh_token": "refresh-token-jwt-string",
+      "token_type": "bearer",
+      "user": {
+        "id": "b2e5c8fa-8123-4def-9abc-d0123456789a",
+        "email": "developer@company.com",
+        "first_name": "John",
+        "last_name": "Doe",
+        "role": "employee",
+        "department_id": "a1d4b7c8-9012-3def-4abc-567890123456"
+      }
+    },
+    "ForgotPasswordResponse": {
+      "reset_token": "mock-reset-token-value",
+      "message": "Password reset link sent successfully to email."
+    }
+  },
+  "bookings": {
+    "BookingResponse": {
+      "id": "77889900-aabb-ccdd-eeff-001122334455",
+      "asset_id": "c1f7b8a2-89cd-4ef1-9012-3456789abcde",
+      "booked_by": "b2e5c8fa-8123-4def-9abc-d0123456789a",
+      "start_time": "2026-07-15T09:00:00Z",
+      "end_time": "2026-07-15T11:00:00Z",
+      "status": "upcoming",
+      "purpose": "Team sync and retrospective meeting",
+      "cancelled_at": null,
+      "created_at": "2026-07-12T14:14:06Z",
+      "updated_at": "2026-07-12T14:14:06Z"
+    },
+    "CreateBookingRequest": {
+      "asset_id": "c1f7b8a2-89cd-4ef1-9012-3456789abcde",
+      "start_time": "2026-07-15T09:00:00Z",
+      "end_time": "2026-07-15T11:00:00Z",
+      "purpose": "Retrospective meeting"
+    },
+    "ResourceAvailabilityResponse": {
+      "asset_id": "c1f7b8a2-89cd-4ef1-9012-3456789abcde",
+      "bookings": [
+        {
+          "id": "77889900-aabb-ccdd-eeff-001122334455",
+          "asset_id": "c1f7b8a2-89cd-4ef1-9012-3456789abcde",
+          "booked_by": "b2e5c8fa-8123-4def-9abc-d0123456789a",
+          "start_time": "2026-07-15T09:00:00Z",
+          "end_time": "2026-07-15T11:00:00Z",
+          "status": "upcoming",
+          "purpose": "Team retrospective",
+          "cancelled_at": null,
+          "created_at": "2026-07-12T14:14:06Z",
+          "updated_at": "2026-07-12T14:14:06Z"
+        }
+      ]
+    }
+  },
+  "categories": {
+    "CategoryResponse": {
+      "id": "d2c8b7a1-6789-4def-8abc-901234567890",
+      "name": "Electronics",
+      "description": "Computers, tablets, phones, and other computing accessories",
+      "custom_fields": {
+        "RAM": "16GB",
+        "Storage": "512GB SSD",
+        "Processor": "Intel Core i7 / Apple M3"
+      },
+      "status": "active",
+      "created_at": "2026-07-12T14:14:06Z",
+      "updated_at": "2026-07-12T14:14:06Z"
+    },
+    "CreateCategoryRequest": {
+      "name": "Electronics",
+      "description": "Computing and IT assets",
+      "custom_fields": {
+        "RAM": "16GB",
+        "Storage": "512GB SSD"
+      }
+    },
+    "UpdateCategoryRequest": {
+      "name": "IT Hardware",
+      "description": "IT devices and components",
+      "custom_fields": {
+        "RAM": "32GB",
+        "Storage": "1TB SSD"
+      }
+    },
+    "UpdateStatusRequest": {
+      "status": "active"
+    }
+  },
+  "departments": {
+    "DepartmentResponse": {
+      "id": "a1d4b7c8-9012-3def-4abc-567890123456",
+      "name": "Engineering",
+      "code": "ENG-HQ",
+      "description": "Software development and infrastructure management division",
+      "status": "active",
+      "parent_id": null,
+      "head_id": "b2e5c8fa-8123-4def-9abc-d0123456789a",
+      "created_at": "2026-07-12T14:14:06Z",
+      "updated_at": "2026-07-12T14:14:06Z"
+    },
+    "CreateDepartmentRequest": {
+      "name": "Engineering",
+      "code": "ENG-HQ",
+      "description": "Engineering team",
+      "parent_id": null,
+      "head_id": "b2e5c8fa-8123-4def-9abc-d0123456789a"
+    },
+    "UpdateDepartmentRequest": {
+      "name": "R&D Engineering",
+      "description": "R&D engineering team",
+      "parent_id": null,
+      "head_id": null
+    },
+    "UpdateStatusRequest": {
+      "status": "active"
+    }
+  },
+  "employees": {
+    "EmployeeResponse": {
+      "id": "b2e5c8fa-8123-4def-9abc-d0123456789a",
+      "email": "developer@company.com",
+      "first_name": "John",
+      "last_name": "Doe",
+      "phone": "+91-9999988888",
+      "role": "employee",
+      "status": "active",
+      "department_id": "a1d4b7c8-9012-3def-4abc-567890123456",
+      "created_at": "2026-07-12T14:14:06Z",
+      "updated_at": "2026-07-12T14:14:06Z"
+    },
+    "CreateEmployeeRequest": {
+      "email": "developer@company.com",
+      "password": "SecurePassword123",
+      "first_name": "John",
+      "last_name": "Doe",
+      "phone": "+91-9999988888",
+      "department_id": "a1d4b7c8-9012-3def-4abc-567890123456"
+    },
+    "UpdateEmployeeRequest": {
+      "first_name": "Johnny",
+      "last_name": "Doe",
+      "phone": "+91-9999977777",
+      "department_id": "a1d4b7c8-9012-3def-4abc-567890123456"
+    },
+    "UpdateRoleRequest": {
+      "role": "asset_manager"
+    },
+    "UpdateStatusRequest": {
+      "status": "active"
+    },
+    "RegisterFcmTokenRequest": {
+      "fcm_token": "fcm-registration-token-device-xyz"
+    }
+  },
+  "maintenance": {
+    "MaintenanceRequestResponse": {
+      "id": "11223344-5566-7788-9900-aabbccddeeff",
+      "asset_id": "c1f7b8a2-89cd-4ef1-9012-3456789abcde",
+      "raised_by": "b2e5c8fa-8123-4def-9abc-d0123456789a",
+      "description": "My laptop screen is flickering intermittently when compiling code.",
+      "priority": "medium",
+      "status": "pending",
+      "technician_id": null,
+      "approved_by": null,
+      "photo_url": "https://example.com/maintenance/flicker.png",
+      "resolved_at": null,
+      "resolution_notes": null,
+      "created_at": "2026-07-12T14:14:06Z",
+      "updated_at": "2026-07-12T14:14:06Z"
+    },
+    "CreateMaintenanceRequest": {
+      "asset_id": "c1f7b8a2-89cd-4ef1-9012-3456789abcde",
+      "description": "Laptop battery drains in less than an hour.",
+      "priority": "medium",
+      "photo_url": null
+    },
+    "AssignTechnicianRequest": {
+      "technician_id": "11111111-2222-3333-4444-555555555555"
+    },
+    "ResolveRequest": {
+      "resolution_notes": "Replaced battery pack; battery health back at 100% capacity."
+    }
+  },
+  "notifications": {
+    "NotificationResponse": {
+      "id": "22334455-6677-8899-00aa-bbccddeeff11",
+      "employee_id": "b2e5c8fa-8123-4def-9abc-d0123456789a",
+      "type": "asset_assigned",
+      "title": "New Asset Assigned",
+      "message": "Asset MacBook Pro 16 (AF-0012) has been assigned to you by IT Department.",
+      "is_read": false,
+      "entity_type": "Asset",
+      "entity_id": "c1f7b8a2-89cd-4ef1-9012-3456789abcde",
+      "created_at": "2026-07-12T14:14:06Z"
+    },
+    "ActivityLogResponse": {
+      "id": "33445566-7788-9900-aabb-ccddeeff1122",
+      "employee_id": "b2e5c8fa-8123-4def-9abc-d0123456789a",
+      "action": "create_booking",
+      "entity_type": "Booking",
+      "entity_id": "77889900-aabb-ccdd-eeff-001122334455",
+      "details": {
+        "asset_tag": "AF-0062",
+        "start_time": "2026-07-15T09:00:00Z"
+      },
+      "created_at": "2026-07-12T14:14:06Z"
+    }
+  },
+  "reports": {
+    "DashboardKpiResponse": {
+      "assets_available": 142,
+      "assets_allocated": 312,
+      "assets_under_maintenance": 23,
+      "active_bookings": 18,
+      "overdue_allocations": 3,
+      "pending_maintenance_requests": 8,
+      "pending_transfers": 5
+    },
+    "AssetUtilizationResponse": {
+      "total_assets": 477,
+      "allocated": 312,
+      "available": 142,
+      "under_maintenance": 23,
+      "utilization_rate": 0.6541
+    },
+    "MaintenanceFrequencyItem": {
+      "asset_id": "c1f7b8a2-89cd-4ef1-9012-3456789abcde",
+      "asset_name": "MacBook Pro 16",
+      "asset_tag": "AF-0012",
+      "maintenance_count": 4
+    },
+    "DepartmentAllocationItem": {
+      "department_id": "a1d4b7c8-9012-3def-4abc-567890123456",
+      "department_name": "Engineering",
+      "total_allocations": 115
+    },
+    "BookingHeatmapItem": {
+      "hour": 14,
+      "booking_count": 42
+    },
+    "MostUsedAssetItem": {
+      "asset_id": "77889900-aabb-ccdd-eeff-001122334455",
+      "name": "Conference Room B2",
+      "asset_tag": "ROOM-B2",
+      "usage_count": 34,
+      "description": "34 bookings this month"
+    },
+    "IdleAssetItem": {
+      "asset_id": "889900aa-bbcc-ddee-ff00-112233445566",
+      "name": "Nikon DSLR Camera",
+      "asset_tag": "AF-0301",
+      "days_idle": 60,
+      "description": "unused 60+ days"
+    },
+    "MaintenanceDueItem": {
+      "asset_id": "9900aa11-bbcc-ddee-ff00-223344556677",
+      "name": "Toyota Forklift",
+      "asset_tag": "AF-0087",
+      "next_maintenance_date": "2026-07-17",
+      "days_remaining": 5,
+      "description": "service due in 5 days"
+    },
+    "NearingRetirementItem": {
+      "asset_id": "aa11bb22-ccdd-eeff-0011-334455667788",
+      "name": "Dell Inspiron Laptop",
+      "asset_tag": "AF-0020",
+      "age_years": 4.1,
+      "expected_lifespan_years": 4,
+      "description": "4 years old : nearing retirement"
+    },
+    "MaintenanceAndRetirementResponse": {
+      "due_for_maintenance": [
+        {
+          "asset_id": "9900aa11-bbcc-ddee-ff00-223344556677",
+          "name": "Toyota Forklift",
+          "asset_tag": "AF-0087",
+          "next_maintenance_date": "2026-07-17",
+          "days_remaining": 5,
+          "description": "service due in 5 days"
+        }
+      ],
+      "nearing_retirement": [
+        {
+          "asset_id": "aa11bb22-ccdd-eeff-0011-334455667788",
+          "name": "Dell Inspiron Laptop",
+          "asset_tag": "AF-0020",
+          "age_years": 4.1,
+          "expected_lifespan_years": 4,
+          "description": "4 years old : nearing retirement"
+        }
+      ]
+    },
+    "ReportsSummaryResponse": {
+      "utilization": {
+        "total_assets": 477,
+        "allocated": 312,
+        "available": 142,
+        "under_maintenance": 23,
+        "utilization_rate": 0.6541
+      },
+      "departments": [
+        {
+          "department_id": "a1d4b7c8-9012-3def-4abc-567890123456",
+          "department_name": "Engineering",
+          "total_allocations": 115
+        }
+      ],
+      "maintenance_frequency": [
+        {
+          "asset_id": "c1f7b8a2-89cd-4ef1-9012-3456789abcde",
+          "asset_name": "MacBook Pro 16",
+          "asset_tag": "AF-0012",
+          "maintenance_count": 4
+        }
+      ],
+      "most_used": [
+        {
+          "asset_id": "77889900-aabb-ccdd-eeff-001122334455",
+          "name": "Conference Room B2",
+          "asset_tag": "ROOM-B2",
+          "usage_count": 34,
+          "description": "34 bookings this month"
+        }
+      ],
+      "idle": [
+        {
+          "asset_id": "889900aa-bbcc-ddee-ff00-112233445566",
+          "name": "Nikon DSLR Camera",
+          "asset_tag": "AF-0301",
+          "days_idle": 60,
+          "description": "unused 60+ days"
+        }
+      ],
+      "maintenance_retirement": {
+        "due_for_maintenance": [
+          {
+            "asset_id": "9900aa11-bbcc-ddee-ff00-223344556677",
+            "name": "Toyota Forklift",
+            "asset_tag": "AF-0087",
+            "next_maintenance_date": "2026-07-17",
+            "days_remaining": 5,
+            "description": "service due in 5 days"
+          }
+        ],
+        "nearing_retirement": [
+          {
+            "asset_id": "aa11bb22-ccdd-eeff-0011-334455667788",
+            "name": "Dell Inspiron Laptop",
+            "asset_tag": "AF-0020",
+            "age_years": 4.1,
+            "expected_lifespan_years": 4,
+            "description": "4 years old : nearing retirement"
+          }
+        ]
+      }
+    }
+  }
+}

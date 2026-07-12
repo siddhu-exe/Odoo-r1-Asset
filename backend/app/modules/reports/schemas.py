@@ -1,3 +1,6 @@
+import uuid
+from datetime import date
+
 from app.shared.base_schema import BaseSchema
 
 
@@ -35,3 +38,51 @@ class DepartmentAllocationItem(BaseSchema):
 class BookingHeatmapItem(BaseSchema):
     hour: int
     booking_count: int
+
+
+class MostUsedAssetItem(BaseSchema):
+    asset_id: uuid.UUID
+    name: str
+    asset_tag: str
+    usage_count: int
+    description: str
+
+
+class IdleAssetItem(BaseSchema):
+    asset_id: uuid.UUID
+    name: str
+    asset_tag: str
+    days_idle: int
+    description: str
+
+
+class MaintenanceDueItem(BaseSchema):
+    asset_id: uuid.UUID
+    name: str
+    asset_tag: str
+    next_maintenance_date: date
+    days_remaining: int
+    description: str
+
+
+class NearingRetirementItem(BaseSchema):
+    asset_id: uuid.UUID
+    name: str
+    asset_tag: str
+    age_years: float
+    expected_lifespan_years: int
+    description: str
+
+
+class MaintenanceAndRetirementResponse(BaseSchema):
+    due_for_maintenance: list[MaintenanceDueItem]
+    nearing_retirement: list[NearingRetirementItem]
+
+
+class ReportsSummaryResponse(BaseSchema):
+    utilization: AssetUtilizationResponse
+    departments: list[DepartmentAllocationItem]
+    maintenance_frequency: list[MaintenanceFrequencyItem]
+    most_used: list[MostUsedAssetItem]
+    idle: list[IdleAssetItem]
+    maintenance_retirement: MaintenanceAndRetirementResponse
