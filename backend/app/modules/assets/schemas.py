@@ -22,6 +22,8 @@ class AssetResponse(BaseSchema):
     photo_url: str | None
     document_url: str | None
     notes: str | None
+    next_maintenance_date: date | None
+    expected_lifespan_years: int | None
     created_at: datetime
     updated_at: datetime
 
@@ -38,6 +40,8 @@ class CreateAssetRequest(BaseSchema):
     photo_url: str | None = None
     document_url: str | None = None
     notes: str | None = None
+    next_maintenance_date: date | None = None
+    expected_lifespan_years: int | None = None
 
 
 class UpdateAssetRequest(BaseSchema):
@@ -48,6 +52,8 @@ class UpdateAssetRequest(BaseSchema):
     notes: str | None = None
     photo_url: str | None = None
     document_url: str | None = None
+    next_maintenance_date: date | None = None
+    expected_lifespan_years: int | None = None
 
 
 class AllocationHistoryEntry(BaseSchema):

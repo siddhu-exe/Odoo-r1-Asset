@@ -36,6 +36,8 @@ def _to_asset_response(asset: Asset) -> AssetResponse:
         photo_url=asset.photo_url,
         document_url=asset.document_url,
         notes=asset.notes,
+        next_maintenance_date=asset.next_maintenance_date,
+        expected_lifespan_years=asset.expected_lifespan_years,
         created_at=asset.created_at,
         updated_at=asset.updated_at,
     )
@@ -92,6 +94,8 @@ async def create_asset(
         photo_url=request.photo_url,
         document_url=request.document_url,
         notes=request.notes,
+        next_maintenance_date=request.next_maintenance_date,
+        expected_lifespan_years=request.expected_lifespan_years,
     )
     await asset_repository.create(asset)
 
