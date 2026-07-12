@@ -3,24 +3,16 @@ import { useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import MainLayout from '../../components/layout/MainLayout'
 import api from '../../api'
-import { calculateDaysSince } from '../../utils/helpers'
 import {
   Package,
   Calendar,
   Wrench,
   BarChart3,
-  Plus,
-  Layers,
   ChevronRight,
   LayoutDashboard,
   Bell,
   Activity,
   TrendingUp,
-  Server,
-  Terminal,
-  Laptop,
-  Monitor,
-  ArrowRight
 } from 'lucide-react'
 import {
   BarChart,
@@ -35,58 +27,107 @@ import {
   LabelList
 } from 'recharts'
 
+const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+function toLocalDateStr(d) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+// Returns an array of Date objects from Monday of the current week through today
+function getThisWeekDays() {
+  const today = new Date()
+  const dow = today.getDay()
+  const monday = new Date(today)
+  monday.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1))
+  monday.setHours(0, 0, 0, 0)
+  const days = []
+  const cur = new Date(monday)
+  const end = new Date(today)
+  end.setHours(23, 59, 59, 999)
+  while (cur <= end) {
+    days.push(new Date(cur))
+    cur.setDate(cur.getDate() + 1)
+  }
+  return days
+}
+
 export default function Dashboard() {
   const { user } = useAuth()
   const location = useLocation()
-  const [hoveredSection, setHoveredSection] = useState('')
   const [kpi, setKpi] = useState(null)
+  const [bookings, setBookings] = useState([])
   const [notifications, setNotifications] = useState([])
 
   useEffect(() => {
     Promise.all([
       api.get('/reports/dashboard'),
-      api.get('/notifications')
-    ]).then(([kpiRes, notifRes]) => {
+      api.get('/notifications').catch(() => ({ data: [] })),
+      api.get('/bookings?page_size=100').catch(() => ({ data: { items: [] } })),
+    ]).then(([kpiRes, notifRes, bookRes]) => {
       setKpi(kpiRes.data)
-      setNotifications(notifRes.data)
+      setNotifications(notifRes.data ?? [])
+      setBookings(bookRes.data.items ?? [])
     }).catch(() => {})
   }, [])
 
-  const totalAssets = kpi
-    ? kpi.assets_available + kpi.assets_allocated + kpi.assets_under_maintenance
-    : 0
-  const allocatedAssets = kpi?.assets_allocated ?? 0
-  const availableAssets = kpi?.assets_available ?? 0
-  const maintenanceCount = kpi?.pending_maintenance_requests ?? 0
-  const pendingBookings = kpi?.active_bookings ?? 0
+  // ── KPI values ──────────────────────────────────────────────────────────────
+  const assetsAvailable      = kpi?.assets_available        ?? 0
+  const assetsAllocated      = kpi?.assets_allocated        ?? 0
+  const assetsMaintenance    = kpi?.assets_under_maintenance ?? 0
+  const pendingMaintenance   = kpi?.pending_maintenance_requests ?? 0
+  const activeBookings       = kpi?.active_bookings         ?? 0
+  const totalAssets          = assetsAvailable + assetsAllocated + assetsMaintenance
 
-  const barData = [
-    { label: 'Mon', value: 48 },
-    { label: 'Tue', value: 58 },
-    { label: 'Wed', value: 51 },
-    { label: 'Thu', value: 68 },
-    { label: 'Fri', value: 64 },
-    { label: 'Sat', value: 76 },
-    { label: 'Today', value: 88, highlight: true }
-  ]
+  // Operations score: percentage of assets NOT stuck in maintenance
+  const opsScore = totalAssets > 0
+    ? Math.round(((totalAssets - assetsMaintenance) / totalAssets) * 100)
+    : (kpi ? 100 : 0)
 
-  const donutData = [
-    { name: 'Neutral category', value: 46, color: '#C9CCD3' },
-    { name: 'Purple', value: 31, color: '#8B7FE8' },
-    { name: 'Orange', value: 23, color: '#FF5A3C' }
-  ]
+  // ── Daily Activity: booking count per day this week ─────────────────────────
+  const todayStr = toLocalDateStr(new Date())
+  const weekDays = getThisWeekDays()
 
+  const bookingsByDay = {}
+  bookings.forEach(b => {
+    const key = toLocalDateStr(new Date(b.start_time))
+    bookingsByDay[key] = (bookingsByDay[key] || 0) + 1
+  })
+
+  const barData = weekDays.map(d => {
+    const key = toLocalDateStr(d)
+    return {
+      label: key === todayStr ? 'Today' : DAY_LABELS[d.getDay()],
+      value: bookingsByDay[key] || 0,
+      highlight: key === todayStr,
+    }
+  })
+  const hasActivity = barData.some(d => d.value > 0)
+
+  // ── Asset Mix: real status breakdown ────────────────────────────────────────
+  const donutData = totalAssets > 0
+    ? (() => {
+        const avail = Math.round(assetsAvailable   / totalAssets * 100)
+        const alloc = Math.round(assetsAllocated   / totalAssets * 100)
+        const maint = 100 - avail - alloc
+        return [
+          { name: 'Available',    value: avail, color: '#C9CCD3' },
+          { name: 'Allocated',    value: alloc, color: '#8B7FE8' },
+          { name: 'Maintenance',  value: maint, color: '#FF5A3C' },
+        ].filter(d => d.value > 0)
+      })()
+    : [{ name: 'No assets yet', value: 100, color: '#E5E7EB' }]
+
+  // ── Nav ─────────────────────────────────────────────────────────────────────
   const navItems = [
-    { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { label: 'Assets', path: '/assets', icon: Package },
+    { label: 'Dashboard',          path: '/dashboard',  icon: LayoutDashboard },
+    { label: 'Assets',             path: '/assets',     icon: Package },
     { label: 'Allocation & Transfer', path: '/allocation', icon: ChevronRight },
-    { label: 'Reports', path: '/reports', icon: BarChart3 },
-    { label: 'Notifications', path: '/notifications', icon: Bell }
+    { label: 'Reports',            path: '/reports',    icon: BarChart3 },
+    { label: 'Notifications',      path: '/notifications', icon: Bell },
   ]
 
   const renderTodayLabel = ({ x, y, width, payload }) => {
     if (!payload?.highlight) return null
-
     return (
       <g>
         <rect x={x + width / 2 - 28} y={y - 30} width={56} height={22} rx={11} fill="#FF5A3C" />
@@ -101,6 +142,8 @@ export default function Dashboard() {
     <MainLayout>
       <div className="min-h-full -m-4 sm:-m-6 lg:-m-8 p-4 sm:p-6 lg:p-8 bg-background relative">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start mb-8">
+
+          {/* ── Left sidebar ── */}
           <div className="lg:col-span-4 flex flex-col gap-6 self-start">
             {/* Profile */}
             <div className="bg-[#EFEFEF] rounded-[24px] border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-5 relative overflow-hidden">
@@ -116,7 +159,9 @@ export default function Dashboard() {
               </div>
               <div className="mt-4 flex items-center justify-between rounded-2xl bg-white/75 px-4 py-3 text-xs text-black/70">
                 <span className="font-medium">Operations score</span>
-                <span className="font-bold text-black">92%</span>
+                <span className="font-bold text-black">
+                  {kpi ? `${opsScore}%` : '—'}
+                </span>
               </div>
             </div>
 
@@ -127,7 +172,6 @@ export default function Dashboard() {
                 {navItems.map((item) => {
                   const Icon = item.icon
                   const active = location.pathname === item.path
-
                   return (
                     <div key={item.label} className="relative">
                       <Link
@@ -145,6 +189,7 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* ── Main content ── */}
           <div className="lg:col-span-8 flex flex-col gap-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
               <div>
@@ -153,23 +198,49 @@ export default function Dashboard() {
               </div>
             </div>
 
+            {/* ── KPI cards ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { label: 'Total Assets', val: totalAssets, sub: '+2 this month', icon: Package, tone: 'orange' },
-                { label: 'Allocated', val: allocatedAssets, sub: `${Math.round(allocatedAssets / (totalAssets || 1) * 100)}% utilization`, icon: TrendingUp, tone: 'purple' },
-                { label: 'Available', val: availableAssets, sub: `${pendingBookings} pending bookings`, icon: Calendar, tone: 'light' },
-                { label: 'Maintenance', val: maintenanceCount, sub: 'Needs attention', icon: Wrench, tone: 'dark' }
+                {
+                  label: 'Total Assets',
+                  val: totalAssets,
+                  sub: totalAssets > 0 ? `${assetsAvailable + assetsAllocated} operational` : 'No assets yet',
+                  icon: Package,
+                  tone: 'orange',
+                },
+                {
+                  label: 'Allocated',
+                  val: assetsAllocated,
+                  sub: `${totalAssets > 0 ? Math.round(assetsAllocated / totalAssets * 100) : 0}% utilization`,
+                  icon: TrendingUp,
+                  tone: 'purple',
+                },
+                {
+                  label: 'Available',
+                  val: assetsAvailable,
+                  sub: `${activeBookings} active booking${activeBookings !== 1 ? 's' : ''}`,
+                  icon: Calendar,
+                  tone: 'light',
+                },
+                {
+                  label: 'Maintenance',
+                  val: pendingMaintenance,
+                  sub: pendingMaintenance > 0 ? 'Needs attention' : 'All clear',
+                  icon: Wrench,
+                  tone: 'dark',
+                },
               ].map((stat, idx) => {
                 const IconComp = stat.icon
-                const toneClasses = { orange: 'bg-[#FF5A3C] text-white', purple: 'bg-[#8B7FE8] text-white', light: 'bg-white text-black border border-black/8', dark: 'bg-[#1A1A1A] text-white' }
+                const toneClasses    = { orange: 'bg-[#FF5A3C] text-white', purple: 'bg-[#8B7FE8] text-white', light: 'bg-white text-black border border-black/8', dark: 'bg-[#1A1A1A] text-white' }
                 const iconBoxClasses = { orange: 'bg-white/20 text-white border border-white/20', purple: 'bg-white/20 text-white border border-white/20', light: 'bg-[#FFF1EC] text-[#FF5A3C]', dark: 'bg-white/15 text-white border border-white/15' }
-
                 return (
                   <div key={idx} className={`rounded-[24px] p-5 shadow-[0_14px_34px_rgba(17,17,17,0.08)] ${toneClasses[stat.tone]}`}>
                     <div className="flex items-start justify-between gap-4">
                       <div className="min-w-0">
                         <p className={`text-sm font-medium ${stat.tone === 'light' ? 'text-black/55' : 'text-white/75'}`}>{stat.label}</p>
-                        <p className={`mt-2 text-[34px] leading-none font-black ${stat.tone === 'light' ? 'text-black' : 'text-white'}`}>{stat.val}</p>
+                        <p className={`mt-2 text-[34px] leading-none font-black ${stat.tone === 'light' ? 'text-black' : 'text-white'}`}>
+                          {kpi ? stat.val : '—'}
+                        </p>
                         <p className={`mt-3 text-sm ${stat.tone === 'light' ? 'text-black/55' : 'text-white/75'}`}>{stat.sub}</p>
                       </div>
                       <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${iconBoxClasses[stat.tone]}`}>
@@ -181,68 +252,105 @@ export default function Dashboard() {
               })}
             </div>
 
+            {/* ── Charts ── */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+              {/* Daily Activity */}
               <div className="lg:col-span-8 rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-black mb-6 flex items-center gap-2">
-                  <TrendingUp size={16} className="text-[#FF5A3C]" /> Daily Activity
-                </h3>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-black flex items-center gap-2">
+                    <TrendingUp size={16} className="text-[#FF5A3C]" /> Daily Activity
+                  </h3>
+                  <span className="text-[11px] text-black/35 font-medium">Bookings this week</span>
+                </div>
                 <div className="h-72 w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={barData} margin={{ top: 28, right: 6, left: -8, bottom: 0 }}>
-                      <XAxis dataKey="label" axisLine={false} tickLine={false} stroke="#6B7280" fontSize={12} />
-                      <YAxis axisLine={false} tickLine={false} stroke="#6B7280" fontSize={12} />
-                      <Tooltip
-                        cursor={{ fill: 'rgba(255, 90, 60, 0.08)' }}
-                        contentStyle={{
-                          background: '#FFFFFF',
-                          border: '1px solid #E5E7EB',
-                          borderRadius: '16px',
-                          color: '#111111',
-                          fontSize: '12px',
-                          boxShadow: '0 14px 30px rgba(17,17,17,0.08)'
-                        }}
-                      />
-                      <Bar dataKey="value" radius={[12, 12, 0, 0]} barSize={28}>
-                        {barData.map((entry, index) => (
-                          <Cell key={`bar-${index}`} fill={entry.highlight ? '#FF5A3C' : '#1A1A1A'} />
-                        ))}
-                        <LabelList content={renderTodayLabel} />
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
+                  {!hasActivity && kpi ? (
+                    <div className="h-full flex flex-col items-center justify-center text-black/30">
+                      <Calendar size={36} className="mb-3 opacity-40" />
+                      <p className="text-sm font-medium">No bookings this week</p>
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={barData} margin={{ top: 28, right: 6, left: -8, bottom: 0 }}>
+                        <XAxis dataKey="label" axisLine={false} tickLine={false} stroke="#6B7280" fontSize={12} />
+                        <YAxis axisLine={false} tickLine={false} stroke="#6B7280" fontSize={12} allowDecimals={false} />
+                        <Tooltip
+                          cursor={{ fill: 'rgba(255, 90, 60, 0.08)' }}
+                          formatter={(val) => [val, 'Bookings']}
+                          contentStyle={{
+                            background: '#FFFFFF',
+                            border: '1px solid #E5E7EB',
+                            borderRadius: '16px',
+                            color: '#111111',
+                            fontSize: '12px',
+                            boxShadow: '0 14px 30px rgba(17,17,17,0.08)',
+                          }}
+                        />
+                        <Bar dataKey="value" radius={[12, 12, 0, 0]} barSize={28}>
+                          {barData.map((entry, i) => (
+                            <Cell key={i} fill={entry.highlight ? '#FF5A3C' : '#1A1A1A'} />
+                          ))}
+                          <LabelList content={renderTodayLabel} />
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
               </div>
 
+              {/* Asset Mix */}
               <div className="lg:col-span-4 rounded-[24px] bg-white border border-black/5 shadow-[0_14px_34px_rgba(17,17,17,0.06)] p-6 flex flex-col">
-                <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-black mb-6 flex items-center gap-2">
-                  <Activity size={16} className="text-[#8B7FE8]" /> Asset Mix
-                </h3>
-                <div className="flex-1 min-h-[230px] flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={donutData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={74} outerRadius={108} paddingAngle={3}>
-                        {donutData.map((entry, index) => (
-                          <Cell key={`donut-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        contentStyle={{
-                          background: '#FFFFFF',
-                          border: '1px solid #E5E7EB',
-                          borderRadius: '16px',
-                          color: '#111111',
-                          fontSize: '12px',
-                          boxShadow: '0 14px 30px rgba(17,17,17,0.08)'
-                        }}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-sm font-semibold uppercase tracking-[0.24em] text-black flex items-center gap-2">
+                    <Activity size={16} className="text-[#8B7FE8]" /> Asset Mix
+                  </h3>
+                  <span className="text-[11px] text-black/35 font-medium">By status</span>
+                </div>
+                <div className="flex-1 min-h-[200px] flex items-center justify-center">
+                  {!kpi ? (
+                    <div className="text-black/25 text-sm">Loading…</div>
+                  ) : totalAssets === 0 ? (
+                    <div className="text-center text-black/30">
+                      <Package size={36} className="mx-auto mb-3 opacity-40" />
+                      <p className="text-sm font-medium">No assets yet</p>
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={donutData}
+                          dataKey="value"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={68}
+                          outerRadius={100}
+                          paddingAngle={3}
+                        >
+                          {donutData.map((entry, i) => (
+                            <Cell key={i} fill={entry.color} />
+                          ))}
+                        </Pie>
+                        <Tooltip
+                          formatter={(val) => [`${val}%`, '']}
+                          contentStyle={{
+                            background: '#FFFFFF',
+                            border: '1px solid #E5E7EB',
+                            borderRadius: '16px',
+                            color: '#111111',
+                            fontSize: '12px',
+                            boxShadow: '0 14px 30px rgba(17,17,17,0.08)',
+                          }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  )}
                 </div>
                 <div className="mt-4 space-y-3 border-t border-black/5 pt-4">
                   {donutData.map((item) => (
                     <div key={item.name} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2.5 text-black/75">
-                        <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                        <span className="h-2.5 w-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
                         <span>{item.name}</span>
                       </div>
                       <span className="font-semibold text-black">{item.value}%</span>
@@ -250,9 +358,8 @@ export default function Dashboard() {
                   ))}
                 </div>
               </div>
+
             </div>
-
-
           </div>
         </div>
       </div>
