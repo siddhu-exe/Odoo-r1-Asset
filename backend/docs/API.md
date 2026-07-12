@@ -780,3 +780,134 @@ Valid values: `active`, `inactive`
 - [ ] On app load / page refresh: call `GET /auth/me` to restore session; if it fails, redirect to login
 - [ ] Use `user.role` to conditionally render routes, nav items, and action buttons
 - [ ] On logout: clear both tokens and the user object from state
+
+---
+
+## Feature 3 — Resource Booking
+
+These endpoints handle booking resources/assets.
+
+---
+
+### GET `/bookings`
+
+Lists all bookings with pagination.
+
+**Query Parameters**
+
+| Param | Type | Default | Notes |
+|---|---|---|---|
+| `page` | int | 1 | Page number (≥ 1) |
+| `page_size` | int | 20 | Items per page (1–100) |
+
+**Response `200 OK`**
+
+```json
+{
+  "items": [
+    {
+      "id": "3fa85f64-...",
+      "asset_id": "a1b2c3d4-...",
+      "booked_by": "b2c3d4e5-...",
+      "start_time": "2026-07-12T09:00:00Z",
+      "end_time": "2026-07-12T10:00:00Z",
+      "status": "booked",
+      "purpose": "Client meeting",
+      "cancelled_at": null,
+      "created_at": "2026-07-12T08:00:00Z",
+      "updated_at": "2026-07-12T08:00:00Z"
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "page_size": 20,
+  "total_pages": 1
+}
+```
+
+---
+
+### POST `/bookings`
+
+Creates a new booking. The backend will validate that there are no overlapping time slots for the specified asset.
+
+**Auth:** Authenticated users only
+
+**Request**
+
+```json
+{
+  "asset_id": "a1b2c3d4-...",
+  "start_time": "2026-07-12T09:00:00Z",
+  "end_time": "2026-07-12T10:00:00Z",
+  "purpose": "Client meeting"
+}
+```
+
+| Field | Type | Required | Notes |
+|---|---|---|---|
+| `asset_id` | uuid | yes | UUID of the asset being booked |
+| `start_time` | datetime | yes | ISO8601 string |
+| `end_time` | datetime | yes | ISO8601 string, must be > start_time |
+| `purpose` | string | no | Optional reason for booking |
+
+**Response `201 Created`** — returns the created booking object.
+
+**Errors**
+
+| Status | `detail` | When |
+|---|---|---|
+| 404 | `Asset not found.` | Bad UUID |
+| 400 | `Asset is not available for booking.` | Asset status is not 'available' or `is_bookable` is false |
+| 400 | `End time must be after start time.` | Invalid time range |
+| 409 | `Resource is already booked during this time.` | Time slot overlap detected |
+
+---
+
+### PATCH `/bookings/{booking_id}/cancel`
+
+Cancels an existing booking.
+
+**Auth:** User who created the booking, or Admin
+
+**Request**
+
+Empty body.
+
+**Response `200 OK`** — returns the updated booking object with status = `cancelled` and `cancelled_at` populated.
+
+**Errors**
+
+| Status | `detail` | When |
+|---|---|---|
+| 404 | `Booking not found.` | Bad UUID |
+| 403 | `You can only cancel your own bookings.` | Caller is not Admin or the original booker |
+| 400 | `Booking is already cancelled.` | Booking was already cancelled |
+
+---
+
+### GET `/bookings/resource/{asset_id}`
+
+Fetches all bookings for a specific resource, useful for checking availability calendars.
+
+**Response `200 OK`**
+
+```json
+{
+  "asset_id": "a1b2c3d4-...",
+  "bookings": [
+    {
+      "id": "3fa85f64-...",
+      "asset_id": "a1b2c3d4-...",
+      "booked_by": "b2c3d4e5-...",
+      "start_time": "2026-07-12T09:00:00Z",
+      "end_time": "2026-07-12T10:00:00Z",
+      "status": "booked",
+      "purpose": "Client meeting",
+      "cancelled_at": null,
+      "created_at": "2026-07-12T08:00:00Z",
+      "updated_at": "2026-07-12T08:00:00Z"
+    }
+  ]
+}
+```
