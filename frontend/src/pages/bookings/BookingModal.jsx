@@ -1,18 +1,33 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { useForm } from '../../hooks/useForm'
-
-const resources = ['Conference Room B2', 'Projector AF-0062', 'Meeting Room A1', 'Training Hall']
+import api from '../../api'
+import { toast } from 'sonner'
 
 export default function BookingModal({ onClose, onSubmit }) {
+  const [assets, setAssets] = useState([])
+  const [loadingAssets, setLoadingAssets] = useState(true)
+
+  useEffect(() => {
+    api.get('/assets?page_size=100')
+      .then(res => setAssets(res.data.items))
+      .catch(() => toast.error('Failed to load assets'))
+      .finally(() => setLoadingAssets(false))
+  }, [])
+
   const { values, errors, touched, isSubmitting, handleChange, handleBlur, handleSubmit, setFieldError } = useForm(
     {
-      resource: 'Conference Room B2',
+      assetId: '',
       date: '',
       startTime: '',
-      endTime: ''
+      endTime: '',
+      purpose: ''
     },
     async (formValues) => {
+      if (!formValues.assetId) {
+        setFieldError('assetId', 'Resource is required')
+        return
+      }
       if (!formValues.date) {
         setFieldError('date', 'Date is required')
         return
@@ -26,12 +41,11 @@ export default function BookingModal({ onClose, onSubmit }) {
         return
       }
 
-      onSubmit({
-        resource: formValues.resource,
-        date: formValues.date,
-        timeSlot: `${formValues.startTime} - ${formValues.endTime}`,
-        bookedBy: 'Current User',
-        status: 'Requested'
+      await onSubmit({
+        asset_id: formValues.assetId,
+        start_time: new Date(`${formValues.date}T${formValues.startTime}`).toISOString(),
+        end_time: new Date(`${formValues.date}T${formValues.endTime}`).toISOString(),
+        purpose: formValues.purpose || null
       })
     }
   )
@@ -62,16 +76,21 @@ export default function BookingModal({ onClose, onSubmit }) {
           <div>
             <label className="label-base">Resource *</label>
             <select
-              name="resource"
-              value={values.resource}
+              name="assetId"
+              value={values.assetId}
               onChange={handleChange}
               onBlur={handleBlur}
               className="input-base"
+              disabled={loadingAssets}
             >
-              {resources.map(r => (
-                <option key={r} value={r}>{r}</option>
+              <option value="">{loadingAssets ? 'Loading...' : 'Select a resource'}</option>
+              {assets.map(a => (
+                <option key={a.id} value={a.id}>{a.name}</option>
               ))}
             </select>
+            {touched.assetId && errors.assetId && (
+              <p className="text-danger text-sm mt-1">{errors.assetId}</p>
+            )}
           </div>
 
           {/* Date */}
@@ -124,6 +143,21 @@ export default function BookingModal({ onClose, onSubmit }) {
             )}
           </div>
 
+          {/* Purpose */}
+          <div>
+            <label className="label-base">Purpose</label>
+            <input
+              type="text"
+              name="purpose"
+              value={values.purpose}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              onKeyPress={handleKeyPress}
+              className="input-base"
+              placeholder="Optional"
+            />
+          </div>
+
           {/* Buttons */}
           <div className="flex gap-3 pt-4">
             <button
@@ -135,7 +169,7 @@ export default function BookingModal({ onClose, onSubmit }) {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || loadingAssets}
               className="btn-primary flex-1"
             >
               {isSubmitting ? 'Booking...' : 'Book Now'}
