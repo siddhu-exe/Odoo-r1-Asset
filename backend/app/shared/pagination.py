@@ -1,7 +1,7 @@
 from typing import Generic, TypeVar
 
 from fastapi import Query
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 T = TypeVar("T")
@@ -19,6 +19,8 @@ class PageParams:
 
 
 class PaginatedResponse(BaseModel, Generic[T]):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
+
     items: list[T]
     total: int
     page: int
