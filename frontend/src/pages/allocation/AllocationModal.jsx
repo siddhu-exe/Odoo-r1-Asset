@@ -6,7 +6,7 @@ export default function AllocationModal({ onClose, onSubmit, assets, employees }
   const { values, errors, touched, isSubmitting, handleChange, handleBlur, handleSubmit, setFieldError } = useForm(
     {
       assetId: assets[0]?.id || '',
-      toEmployee: employees[0]?.name || '',
+      toEmployeeId: employees[0]?.id || '',
       reason: 'Transfer Request'
     },
     async (formValues) => {
@@ -14,12 +14,12 @@ export default function AllocationModal({ onClose, onSubmit, assets, employees }
         setFieldError('assetId', 'Please select an asset')
         return
       }
-      if (!formValues.toEmployee) {
-        setFieldError('toEmployee', 'Please select an employee')
+      if (!formValues.toEmployeeId) {
+        setFieldError('toEmployeeId', 'Please select an employee')
         return
       }
 
-      onSubmit(formValues.assetId, formValues.toEmployee)
+      await onSubmit(formValues.assetId, formValues.toEmployeeId, formValues.reason)
     }
   )
 
@@ -57,7 +57,7 @@ export default function AllocationModal({ onClose, onSubmit, assets, employees }
             >
               {assets.map(asset => (
                 <option key={asset.id} value={asset.id}>
-                  {asset.name} ({asset.id}) - {asset.allocatedTo}
+                  {asset.name} ({asset.asset_tag || asset.id})
                 </option>
               ))}
             </select>
@@ -70,20 +70,20 @@ export default function AllocationModal({ onClose, onSubmit, assets, employees }
           <div>
             <label className="label-base">Transfer To *</label>
             <select
-              name="toEmployee"
-              value={values.toEmployee}
+              name="toEmployeeId"
+              value={values.toEmployeeId}
               onChange={handleChange}
               onBlur={handleBlur}
               className="input-base"
             >
               {employees.map(emp => (
-                <option key={emp.id} value={emp.name}>
-                  {emp.name} ({emp.department})
+                <option key={emp.id} value={emp.id}>
+                  {emp.first_name} {emp.last_name}
                 </option>
               ))}
             </select>
-            {touched.toEmployee && errors.toEmployee && (
-              <p className="text-danger text-sm mt-1">{errors.toEmployee}</p>
+            {touched.toEmployeeId && errors.toEmployeeId && (
+              <p className="text-danger text-sm mt-1">{errors.toEmployeeId}</p>
             )}
           </div>
 
